@@ -1,0 +1,17 @@
+# Local files
+local.properties
+
+# Gradle files
+.gradle/
+build/
+gradle/
+gradlew*
+
+# Android Studio files
+.idea/
+.navigation/
+captures/
+*.iml
+
+# OS X files
+.DS_Store
