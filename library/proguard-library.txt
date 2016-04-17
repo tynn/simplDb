@@ -1,0 +1,8 @@
+-keepnames @simpl.db.** class *
+-keepclassmembernames class * {
+    @simpl.db.table.Column public static final java.lang.String *;
+}
+-keepclasseswithmembers,allowobfuscation class * {
+    @simpl.db.table.Column public static final java.lang.String *;
+}
+-keepclassmembers class simpl.db.** { public final *; }
