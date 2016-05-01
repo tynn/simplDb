@@ -1,0 +1,36 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 23
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    testBuildType 'release'
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            signingConfig signingConfigs.debug
+            testProguardFiles 'proguard-minify.txt'
+        }
+    }
+
+    variantFilter { variant ->
+        if(variant.buildType.name.equals('debug'))
+            variant.setIgnore(true);
+    }
+}
+
+dependencies {
+    compile project(':library')
+    testCompile 'junit:junit:4.12'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+}
