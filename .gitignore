@@ -4,8 +4,6 @@ local.properties
 # Gradle files
 .gradle/
 build/
-gradle/
-gradlew*
 
 # Android Studio files
 .idea/
