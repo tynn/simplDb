@@ -1,1 +1,1 @@
-include ':library', ':minify'
+include ':library', ':examples:minify'
