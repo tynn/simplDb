@@ -188,7 +188,6 @@ public abstract class SimplDb implements SimplDef {
      * Also stops the background worker if {@link #resume()} wasn't called by another instance before.
      */
     public final void pause() {
-        mSQLiteOpenHelper.close();
         sBlocksQuitter.remove(this);
         if (sQuitter != null && sBlocksQuitter.isEmpty()) {
             Handler handler = sQuitter;
@@ -203,6 +202,7 @@ public abstract class SimplDb implements SimplDef {
     @Override
     protected void finalize() throws Throwable {
         pause();
+        close();
         super.finalize();
     }
 
@@ -387,7 +387,6 @@ public abstract class SimplDb implements SimplDef {
             });
         } else {
             final long rowId = insert(insert.tableDef, insert.contentValues);
-            mSQLiteOpenHelper.close();
 
             if (rowId >= 0)
                 sendTableChanged(insert.tableDef);
@@ -432,8 +431,6 @@ public abstract class SimplDb implements SimplDef {
                         });
                 }
 
-                mSQLiteOpenHelper.close();
-
                 sendTableChanged(updated);
             }
     }
@@ -470,19 +467,15 @@ public abstract class SimplDb implements SimplDef {
      * @param id       of the row
      */
     public void delete(final Class<? extends TableDef> tableDef, final long id) {
-        if (isUiThread()) {
+        if (isUiThread())
             runOnWorkerThread(new Runnable() {
                 @Override
                 public void run() {
                     delete(tableDef, id);
                 }
             });
-        } else {
-            if (delete(getName(tableDef), "_id=?", Long.toString(id)))
-                sendTableChanged(tableDef);
-            mSQLiteOpenHelper.close();
-        }
-
+        else if (delete(getName(tableDef), "_id=?", Long.toString(id)))
+            sendTableChanged(tableDef);
     }
 
     private boolean delete(String table, String whereClause, String... whereArgs) {
