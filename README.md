@@ -36,7 +36,7 @@ constants. The variable name must match the column name.
         String MY_NAME = "my_name";
 
         @Column(type = INTEGER)
-        @Check(expression = SCORE + ">5")
+        @Check(expression = "score>5")
         String SCORE = "score";
     }
 
