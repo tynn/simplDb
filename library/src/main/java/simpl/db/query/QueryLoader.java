@@ -36,6 +36,7 @@ import simpl.db.table.TableDef;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class QueryLoader extends Loader<Cursor> {
     private final Class<? extends QueryDef> mQueryDef;
+    private final QueryDef.Filter mFilter;
     private final SimplDb mDb;
     private Cursor mData;
 
@@ -59,9 +60,20 @@ public class QueryLoader extends Loader<Cursor> {
      * @param db       to use
      */
     public QueryLoader(Context context, Class<? extends QueryDef> queryDef, SimplDb db) {
+        this(context, queryDef, null, db);
+    }
+
+    /**
+     * @param context  of the application
+     * @param queryDef to execute
+     * @param filter   to apply
+     * @param db       to use
+     */
+    public QueryLoader(Context context, Class<? extends QueryDef> queryDef, QueryDef.Filter filter, SimplDb db) {
         super(context);
         db.registerTableObserver(mTableDefObserver, queryDef);
         mQueryDef = queryDef;
+        mFilter = filter;
         mDb = db;
     }
 
@@ -72,7 +84,7 @@ public class QueryLoader extends Loader<Cursor> {
     }
 
     void requestCursor() {
-        mDb.query(mQueryDef, null, mQueryDefCallback);
+        mDb.query(mQueryDef, mFilter, mQueryDefCallback);
     }
 
     @Override
