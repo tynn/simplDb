@@ -177,17 +177,17 @@ public abstract class SimplDb implements SimplDef {
     }
 
     /**
-     * Resumes this instance. Keeps the background worker alive until {@link #pause()} is called.
+     * Resumes this instance. Keeps the background worker alive until {@link #onPause()} is called.
      */
-    public final void resume() {
+    public final void onResume() {
         sBlocksQuitter.put(this, true);
     }
 
     /**
      * Pauses this instance and closes any open database.
-     * Also stops the background worker if {@link #resume()} wasn't called by another instance before.
+     * Also stops the background worker if {@link #onResume()} wasn't called by another instance before.
      */
-    public final void pause() {
+    public final void onPause() {
         sBlocksQuitter.remove(this);
         if (sQuitter != null && sBlocksQuitter.isEmpty()) {
             Handler handler = sQuitter;
@@ -201,7 +201,7 @@ public abstract class SimplDb implements SimplDef {
 
     @Override
     protected void finalize() throws Throwable {
-        pause();
+        onPause();
         close();
         super.finalize();
     }
