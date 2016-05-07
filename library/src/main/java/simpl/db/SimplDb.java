@@ -19,6 +19,7 @@ package simpl.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -469,6 +470,124 @@ public abstract class SimplDb implements SimplDef {
              * @param db     to insert into
              */
             void onInsertFinished(long rowId, Insert insert, SimplDb db);
+        }
+    }
+
+    private int update(Update update) {
+        return update(update.tableDef, update.contentValues, update.whereClause, update.whereArgs);
+    }
+
+    private synchronized int update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String[] whereArgs) {
+        try {
+            return mSQLiteOpenHelper.getWritableDatabase()
+                    .updateWithOnConflict(getName(tableDef), contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
+        } catch (SQLException e) {
+            Log.e("SQLiteDatabase", "Error updating " + contentValues + " where " + whereClause + " " + Arrays.toString(whereArgs), e);
+            return 0;
+        }
+    }
+
+    /**
+     * @param tableDef      to operate on
+     * @param contentValues to update
+     * @param whereClause   of where to update
+     * @param whereArgs     to fill the ?s of {@code whereClause}
+     * @param callback      to notify
+     */
+    public void update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String[] whereArgs, Update.Callback callback) {
+        update(new Update(tableDef, contentValues, whereClause, whereArgs), callback);
+    }
+
+    /**
+     * @param update   to perform
+     * @param callback to notify
+     */
+    public void update(final Update update, final Update.Callback callback) {
+        if (isUiThread()) {
+            runOnWorkerThread(new Runnable() {
+                @Override
+                public void run() {
+                    update(update, callback);
+                }
+            });
+        } else {
+            final int rowCount = update(update.tableDef, update.contentValues, update.whereClause, update.whereArgs);
+
+            if (rowCount > 0)
+                sendTableChanged(update.tableDef);
+
+            if (callback != null)
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onUpdateFinished(rowCount, update, SimplDb.this);
+                    }
+                });
+        }
+    }
+
+    /**
+     * @param updates  to perform
+     * @param callback to notify
+     */
+    public void update(final Collection<Update> updates, final Update.Callback callback) {
+        if (updates.size() > 0)
+            if (isUiThread()) {
+                runOnWorkerThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        update(updates, callback);
+                    }
+                });
+            } else {
+                HashSet<Class<? extends TableDef>> updated = new HashSet<>();
+
+                for (final Update update : updates) {
+                    final int rowCount = update(update);
+
+                    if (rowCount >= 0)
+                        updated.add(update.tableDef);
+
+                    if (callback != null)
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onUpdateFinished(rowCount, update, SimplDb.this);
+                            }
+                        });
+                }
+
+                sendTableChanged(updated);
+            }
+    }
+
+    /**
+     * Simple wrapper around values to update and a table to update in.
+     */
+    public static class Update extends Insert {
+        public final String whereClause;
+        public final String[] whereArgs;
+
+        /**
+         * @param tableDef      to operate on
+         * @param contentValues to update
+         */
+        public Update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String... whereArgs) {
+            super(tableDef, contentValues);
+            this.whereClause = whereClause;
+            this.whereArgs = whereArgs;
+        }
+
+        /**
+         * A {@code Callback} to be notified after the update.
+         */
+        public interface Callback {
+            /**
+             * @param rowCount of rows updated
+             * @param update   which was applied
+             * @param db       to insert into
+             */
+            void onUpdateFinished(int rowCount, Update update, SimplDb db);
         }
     }
 
