@@ -137,7 +137,7 @@ public class SimplDbUpgradeTest {
         mCursor = null;
         db.insert(TableTest.class, values, new Insert.Callback() {
             @Override
-            public void onInsertionFinished(long rowId, Insert insert, SimplDb db) {
+            public void onInsertFinished(long rowId, Insert insert, SimplDb db) {
                 mCursor = queryTable(db);
             }
         });

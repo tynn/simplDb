@@ -63,7 +63,7 @@ public class MainActivity extends Activity implements SimplDb.Insert.Callback {
     }
 
     @Override
-    public void onInsertionFinished(long rowId, SimplDb.Insert insert, SimplDb db) {
+    public void onInsertFinished(long rowId, SimplDb.Insert insert, SimplDb db) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
             queryWithAsyncTask();
         else

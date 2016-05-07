@@ -395,14 +395,15 @@ public abstract class SimplDb implements SimplDef {
                 uiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onInsertionFinished(rowId, insert, SimplDb.this);
+                        callback.onInsertFinished(rowId, insert, SimplDb.this);
                     }
                 });
         }
     }
 
     /**
-     * @param inserts to perform
+     * @param inserts  to perform
+     * @param callback to notify
      */
     public void insert(final Collection<Insert> inserts, final Insert.Callback callback) {
         if (inserts.size() > 0)
@@ -426,7 +427,7 @@ public abstract class SimplDb implements SimplDef {
                         uiHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                callback.onInsertionFinished(rowId, insert, SimplDb.this);
+                                callback.onInsertFinished(rowId, insert, SimplDb.this);
                             }
                         });
                 }
@@ -436,12 +437,16 @@ public abstract class SimplDb implements SimplDef {
     }
 
     /**
-     *
+     * Simple wrapper around values to insert and a table to insert into.
      */
     public static class Insert {
-        /** */
+        /**
+         * The table to stare the values in.
+         */
         public final Class<? extends TableDef> tableDef;
-        /** */
+        /**
+         * The values to insert into the table.
+         */
         public final ContentValues contentValues = new ContentValues();
 
         /**
@@ -455,10 +460,15 @@ public abstract class SimplDb implements SimplDef {
         }
 
         /**
-         *
+         * A {@code Callback} to be notified after the insert.
          */
         public interface Callback {
-            void onInsertionFinished(long rowId, Insert insert, SimplDb db);
+            /**
+             * @param rowId  of the inserted row or -1 on error
+             * @param insert which was inserted
+             * @param db     to insert into
+             */
+            void onInsertFinished(long rowId, Insert insert, SimplDb db);
         }
     }
 

@@ -198,7 +198,7 @@ public class SimplDbTest {
         mCursor = null;
         mSimplDb.insert(insert, new Callback() {
             @Override
-            public void onInsertionFinished(long rowId, Insert insert, SimplDb db) {
+            public void onInsertFinished(long rowId, Insert insert, SimplDb db) {
                 mCursor = db.getReadableDatabase().query(table, null, null, null, null, null, null);
             }
         });
