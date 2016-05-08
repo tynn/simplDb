@@ -90,7 +90,7 @@ A default constructor must be provided for this implementation.
 
 Get the latest release from the [JitPack repository][2]
 
-    compile 'com.github.tynn:simplDb:0.1@aar'
+    compile 'com.github.tynn:simplDb:0.2@aar'
 
 or download the [latest .jar file][4] directly.
 
@@ -128,4 +128,4 @@ The following Proguard rules should be applied when using the .jar file.
  [1]: https://jitpack.io/v/tynn/simplDb.svg
  [2]: https://jitpack.io/#tynn/simplDb
  [3]: https://www.sqlite.org/lang_altertable.html#otheralter
- [4]: https://jitpack.io/com/github/tynn/simplDb/0.1/simplDb-0.1.jar
+ [4]: https://jitpack.io/com/github/tynn/simplDb/0.2/simplDb-0.2.jar
