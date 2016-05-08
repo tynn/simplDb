@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,8 +27,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 
-import simpl.db.SimplDb;
-import simpl.db.SimplError;
+import simpl.db.query.Join;
+import simpl.db.query.JoinType;
+import simpl.db.query.Query;
+import simpl.db.query.QueryDef;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
 
@@ -75,7 +77,7 @@ public class SimplQuery {
     private final Collection<Class<? extends TableDef>> mTableDefs;
     private final String mTable;
     private final String[] mColumns;
-    private final QueryDef.Filter mFilter = new QueryDef.Filter();
+    private final Filter mFilter = new Filter();
 
     /**
      * @param table   name to compile the query against
@@ -84,7 +86,7 @@ public class SimplQuery {
      * @param tables  this query should observe
      * @see SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)
      */
-    protected SimplQuery(String table, String[] columns, QueryDef.Filter filter, Class<? extends TableDef>... tables) {
+    protected SimplQuery(String table, String[] columns, Filter filter, Class<? extends TableDef>... tables) {
         if (table == null)
             throw new NullPointerException("table must not be null");
         if (tables.length == 0)
@@ -159,14 +161,14 @@ public class SimplQuery {
     }
 
     /**
-     * Wraps {@link #exec(SQLiteDatabase, QueryDef.Filter)} for convenience.
+     * Wraps {@link #exec(SQLiteDatabase, Filter)} for convenience.
      *
      * @param db     to query
      * @param filter to apply
      * @return a cursor positioned before the first entry
      * @see SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)
      */
-    public Cursor exec(SimplDb db, QueryDef.Filter filter) {
+    public Cursor exec(SimplDb db, Filter filter) {
         return exec(db.getReadableDatabase(), filter);
     }
 
@@ -178,9 +180,143 @@ public class SimplQuery {
      * @return a cursor positioned before the first entry
      * @see SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)
      */
-    public Cursor exec(SQLiteDatabase db, QueryDef.Filter filter) {
+    public Cursor exec(SQLiteDatabase db, Filter filter) {
         return db.query(mTable, mColumns, mFilter.getSelection(filter), mFilter.getSelectionArgs(filter),
                 mFilter.getGroupBy(filter), mFilter.getHaving(filter), mFilter.getOrderBy(filter),
                 mFilter.getLimit(filter));
+    }
+
+    /**
+     * {@code Filter} is used to configure and apply a filter to a query.
+     *
+     * @see SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)
+     */
+    public static class Filter {
+        /**
+         * Identifies this filter instance.
+         */
+        public final int id;
+
+        private String mSelection, mGroupBy, mHaving, mOrderBy, mLimit;
+        private String[] mSelectionArgs;
+
+        /**
+         * Creates a new {@code Filter} with id 0.
+         */
+        public Filter() {
+            this(0);
+        }
+
+        /**
+         * @param id of the filter for identification
+         */
+        public Filter(int id) {
+            this.id = id;
+        }
+
+        void set(Filter filter) {
+            if (filter != null) {
+                mSelection = filter.mSelection;
+                mSelectionArgs = filter.mSelectionArgs;
+                mGroupBy = filter.mGroupBy;
+                mHaving = filter.mHaving;
+                mOrderBy = filter.mOrderBy;
+                mLimit = filter.mLimit;
+            }
+        }
+
+        private static String getNullString(String string) {
+            return string.length() > 0 ? string : null;
+        }
+
+        /**
+         * @param selection     or {@code null}
+         * @param selectionArgs or {@code null}
+         */
+        public void setSelection(String selection, String... selectionArgs) {
+            mSelection = getNullString(selection);
+            mSelectionArgs = selectionArgs.length > 0 ? selectionArgs : null;
+        }
+
+        /**
+         * @param groupBy or {@code null}
+         */
+        public void setGroupBy(String groupBy) {
+            mGroupBy = getNullString(groupBy);
+        }
+
+        /**
+         * @param orderBy or {@code null}
+         */
+        public void setOrderBy(String orderBy) {
+            mOrderBy = getNullString(orderBy);
+        }
+
+        /**
+         * @param having or {@code null}
+         */
+        public void setHaving(String having) {
+            mHaving = getNullString(having);
+        }
+
+        /**
+         * @param limit or {@code null}
+         */
+        public void setLimit(int limit) {
+            mLimit = limit > 0 ? Integer.toString(limit) : null;
+        }
+
+        private static String getNullString(String string1, String string2) {
+            return string1 != null ? string1 : string2;
+        }
+
+        String getSelection(Filter filter) {
+            if (filter == null)
+                return mSelection;
+
+            return getNullString(filter.getSelection(null), mSelection);
+        }
+
+        String[] getSelectionArgs(Filter filter) {
+            if (getSelection(filter) == null)
+                return null;
+
+            String[] selectionArgs = null;
+            if (filter != null)
+                selectionArgs = filter.getSelectionArgs(null);
+
+            if (selectionArgs == null)
+                return mSelectionArgs;
+
+            return selectionArgs;
+        }
+
+        String getGroupBy(Filter filter) {
+            if (filter == null)
+                return mGroupBy;
+
+            return getNullString(filter.getGroupBy(null), mGroupBy);
+        }
+
+        String getOrderBy(Filter filter) {
+            if (filter == null)
+                return mOrderBy;
+
+            return getNullString(filter.getOrderBy(null), mOrderBy);
+        }
+
+        String getHaving(Filter filter) {
+            if (filter == null)
+                return mHaving;
+
+            return getNullString(filter.getHaving(null), mHaving);
+        }
+
+        String getLimit(Filter filter) {
+            if (filter == null)
+                return mLimit;
+
+            return getNullString(filter.getLimit(null), mLimit);
+        }
     }
 }

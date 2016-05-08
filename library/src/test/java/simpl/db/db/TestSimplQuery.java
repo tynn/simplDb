@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.db;
 
-import simpl.db.TestTable;
+import simpl.db.SimplQuery;
+import simpl.db.query.QueryDef;
 
 @SuppressWarnings("unchecked")
 public class TestSimplQuery extends SimplQuery implements QueryDef {

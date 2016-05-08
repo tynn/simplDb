@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.db;
 
+import simpl.db.table.TableDef;
 
-import simpl.db.TestTable;
-
-@Query(table = TestTable.class, columns = TestTable.TEST,
-        selection = TestQuery.SELECTION, selectionArgs = TestTable.TEST,
-        groupBy = TestTable.TEST, having = TestTable.TEST,
-        orderBy = TestTable.TEST, limit = 2)
-public interface TestQuery extends QueryDef {
-    String SELECTION = TestTable.TEST + "=?";
-    String[] SELECTION_ARGS = {TestTable.TEST};
-
-    interface Q1 extends QueryDef {
-    }
+public interface TableDefProxy extends TableDef {
 }

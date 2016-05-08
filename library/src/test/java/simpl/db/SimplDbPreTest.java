@@ -18,6 +18,8 @@ package simpl.db;
 
 import org.junit.Test;
 
+import simpl.db.db.TestTable;
+
 import static org.junit.Assert.assertEquals;
 
 public class SimplDbPreTest {

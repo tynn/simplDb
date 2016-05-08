@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db;
+package simpl.db.db;
 
 import simpl.db.query.QueryDef;
 import simpl.db.table.Column;

@@ -23,7 +23,7 @@ import android.database.Cursor;
 import android.os.Build;
 
 import simpl.db.SimplDb;
-import simpl.db.query.QueryDef.Filter;
+import simpl.db.SimplQuery.Filter;
 import simpl.db.table.TableDef;
 
 /**
@@ -36,7 +36,7 @@ import simpl.db.table.TableDef;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class QueryLoader extends Loader<Cursor> {
     private final Class<? extends QueryDef> mQueryDef;
-    private final QueryDef.Filter mFilter;
+    private final Filter mFilter;
     private final SimplDb mDb;
     private Cursor mData;
 
@@ -69,7 +69,7 @@ public class QueryLoader extends Loader<Cursor> {
      * @param filter   to apply
      * @param db       to use
      */
-    public QueryLoader(Context context, Class<? extends QueryDef> queryDef, QueryDef.Filter filter, SimplDb db) {
+    public QueryLoader(Context context, Class<? extends QueryDef> queryDef, Filter filter, SimplDb db) {
         super(context);
         db.registerTableObserver(mTableDefObserver, queryDef);
         mQueryDef = queryDef;

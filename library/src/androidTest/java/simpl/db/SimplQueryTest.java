@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -27,9 +27,10 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import simpl.db.SimplDb;
-import simpl.db.SimplDbTest;
-import simpl.db.query.QueryDef.Filter;
+import simpl.db.SimplQuery.Filter;
+import simpl.db.query.Join;
+import simpl.db.query.Query;
+import simpl.db.query.QueryDef;
 import simpl.db.table.v10.DatabaseTest;
 import simpl.db.table.v10.JoinTest;
 import simpl.db.table.v10.QueryTest;
@@ -38,9 +39,9 @@ import simpl.db.table.v10.TableTest;
 import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static simpl.db.SimplQuery.get;
 import static simpl.db.query.JoinType.CROSS;
 import static simpl.db.query.JoinType.LEFT;
-import static simpl.db.query.SimplQuery.get;
 import static simpl.db.table.Sortorder.DESC;
 
 public class SimplQueryTest {

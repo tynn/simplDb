@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db;
 
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 
-import simpl.db.SimplError;
-import simpl.db.TestTable;
-import simpl.db.query.QueryDef.Filter;
+import simpl.db.SimplQuery.Filter;
+import simpl.db.db.TestJoin;
+import simpl.db.db.TestQuery;
+import simpl.db.db.TestSimplQuery;
+import simpl.db.db.TestTable;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

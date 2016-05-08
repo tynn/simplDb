@@ -41,7 +41,6 @@ import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 import simpl.db.query.QueryDef;
-import simpl.db.query.SimplQuery;
 import simpl.db.table.TableDef;
 
 /**
@@ -338,7 +337,7 @@ public abstract class SimplDb implements SimplDef {
      * @param filter   to use with the query
      * @param callback to notify
      */
-    public void query(final Class<? extends QueryDef> queryDef, final QueryDef.Filter filter, final QueryDef.Callback callback) {
+    public void query(final Class<? extends QueryDef> queryDef, final SimplQuery.Filter filter, final QueryDef.Callback callback) {
         if (isUiThread()) {
             runOnWorkerThread(new Runnable() {
                 @Override

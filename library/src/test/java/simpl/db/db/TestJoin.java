@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.db;
 
 
-import simpl.db.TestTable;
+import simpl.db.query.Join;
+import simpl.db.query.JoinType;
+import simpl.db.query.Query;
+import simpl.db.query.QueryDef;
 
 @Query(table = TestTable.class, columns = TestTable.TEST, limit = 3)
 @Join(table = TestTable.I.class, columns = TestTable.I.TEST2, type = JoinType.INNER, on = TestJoin.ON)

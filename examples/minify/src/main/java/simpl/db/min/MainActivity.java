@@ -30,7 +30,7 @@ import android.widget.ListView;
 
 import simpl.db.SimplDb;
 import simpl.db.query.QueryLoader;
-import simpl.db.query.SimplQuery;
+import simpl.db.SimplQuery;
 
 public class MainActivity extends Activity implements SimplDb.Insert.Callback {
     static final int LIST_VIEW_ID = android.R.id.list;
