@@ -46,6 +46,8 @@ import static org.junit.Assert.assertTrue;
 import static simpl.db.SimplDb.getName;
 import static simpl.db.table.v2.ColumnTest.CHECK;
 import static simpl.db.table.v2.ColumnTest.CHECK$;
+import static simpl.db.table.v2.ColumnTest.COLLATE;
+import static simpl.db.table.v2.ColumnTest.COLLATE$;
 import static simpl.db.table.v2.ColumnTest.COLUMN;
 import static simpl.db.table.v2.ColumnTest.DEFAULT;
 import static simpl.db.table.v2.ColumnTest.NOT_NULL;
@@ -155,6 +157,30 @@ public class SimplDbTest {
     }
 
     @Test
+    public void columnCollate() throws Exception {
+        mColumnInsert.contentValues.put(NOT_NULL, "");
+        mColumnInsert.contentValues.put(CHECK$, 1);
+        mColumnInsert.contentValues.put(COLLATE$, "TODO");
+        insertAndQuery(mColumnInsert, COLUMN_TABLE);
+
+        try {
+            assertTrue(mCursor.moveToFirst());
+            assertEquals("TODO", mCursor.getString(mCursor.getColumnIndex(COLLATE)));
+        } finally {
+            mCursor.close();
+        }
+
+        query(COLUMN_TABLE, COLLATE$ + "=?", "todo");
+
+        try {
+            assertTrue(mCursor.moveToFirst());
+            assertEquals("TODO", mCursor.getString(mCursor.getColumnIndex(COLLATE)));
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
     public void types() throws Exception {
         final byte[] bytes = {'h', 'a', 'l', 'l', 'o'};
         mTypedInsert.contentValues.put(BLOB, bytes);
@@ -194,15 +220,20 @@ public class SimplDbTest {
         assertEquals(new HashSet<>(Arrays.asList(DATA, INFO, KEEP, VALUE)), columns);
     }
 
-    private void insertAndQuery(Insert insert, final String table) throws InterruptedException {
+    void insertAndQuery(Insert insert, final String table) throws InterruptedException {
         mCursor = null;
         mSimplDb.insert(insert, new Callback() {
             @Override
             public void onInsertFinished(long rowId, Insert insert, SimplDb db) {
-                mCursor = db.getReadableDatabase().query(table, null, null, null, null, null, null);
+                query(table, null);
             }
         });
         while (mCursor == null)
             Thread.sleep(100);
+    }
+
+    void query(String table, String selection, String... args) {
+        SQLiteDatabase db = mSimplDb.getReadableDatabase();
+        mCursor = db.query(table, null, selection, args, null, null, null);
     }
 }

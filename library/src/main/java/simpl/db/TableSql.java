@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import simpl.db.table.Check;
+import simpl.db.table.Collate;
 import simpl.db.table.Column;
 import simpl.db.table.ConflictClause;
 import simpl.db.table.Default;
@@ -100,10 +101,11 @@ final class TableSql {
                     mSql.append(' ').append(column.type());
 
                     handlePrimaryKey(field);
-                    handleUnique(field);
                     handleNotNull(field);
-                    handleDefault(field);
+                    handleUnique(field);
                     handleCheck(field);
+                    handleDefault(field);
+                    handleCollate(field);
 
                     return true;
                 }
@@ -167,6 +169,12 @@ final class TableSql {
             else
                 mSql.append(defaultValue.value());
         }
+    }
+
+    private void handleCollate(Field field) {
+        Collate collation = field.getAnnotation(Collate.class);
+        if (collation != null)
+            mSql.append(" COLLATE ").append(collation.collationName());
     }
 
     private void handleCheck(Class<? extends TableDef> tableDef) {
