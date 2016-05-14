@@ -162,7 +162,7 @@ final class TableSql {
         if (defaultValue != null) {
             mSql.append(" DEFAULT ");
 
-            if (defaultValue.isExpression())
+            if (defaultValue.expression())
                 mSql.append('(').append(defaultValue.value()).append(')');
             else
                 mSql.append(defaultValue.value());

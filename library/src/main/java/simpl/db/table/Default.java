@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 public @interface Default {
     String value();
 
-    boolean isExpression() default false;
+    boolean expression() default false;
 
     String CURRENT_TIME = "CURRENT_TIME";
     String CURRENT_DATE = "CURRENT_DATE";
