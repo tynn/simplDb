@@ -84,8 +84,8 @@ final class TableSql {
 
     private static boolean isPublicStaticFinalString(Field field) {
         int modifiers = field.getModifiers();
-        return Modifier.isPublic(modifiers) && Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers) &&
-                field.getType() == String.class;
+        return Modifier.isPublic(modifiers) && Modifier.isFinal(modifiers) &&
+                Modifier.isStatic(modifiers) && field.getType() == String.class;
     }
 
     private boolean addColumn(Field field, String delimiter) {
@@ -182,22 +182,27 @@ final class TableSql {
     }
 
     private void handleCheck(Class<? extends TableDef> tableDef) {
-        handleCheck(tableDef.getAnnotation(Check.class));
+        Check check = tableDef.getAnnotation(Check.class);
+        if (check != null) {
+            mSql.append(',');
+            handleCheck(check);
+        }
     }
 
     private void handleCheck(Field field) {
-        handleCheck(field.getAnnotation(Check.class));
+        Check check = field.getAnnotation(Check.class);
+        if (check != null)
+            handleCheck(check);
     }
 
     private void handleCheck(Check check) {
-        if (check != null)
-            mSql.append(" CHECK (").append(check.expression()).append(')');
+        mSql.append(" CHECK (").append(check.expression()).append(')');
     }
 
     private void handleForeignKey(Class<? extends TableDef> tableDef) {
         ForeignKey foreignKey = tableDef.getAnnotation(ForeignKey.class);
         if (foreignKey != null) {
-            mSql.append(" FOREIGN KEY");
+            mSql.append(", FOREIGN KEY");
             if (!handleColumns(foreignKey.columns()))
                 throw new SimplError(ForeignKey.class);
             handleForeignKey(foreignKey);
@@ -205,20 +210,20 @@ final class TableSql {
     }
 
     private void handleForeignKey(Field field) {
-        handleForeignKey(field.getAnnotation(ForeignKey.class));
+        ForeignKey foreignKey = field.getAnnotation(ForeignKey.class);
+        if (foreignKey != null)
+            handleForeignKey(foreignKey);
     }
 
     private void handleForeignKey(ForeignKey key) {
-        if (key != null) {
-            mSql.append(" REFERENCES ").append(SimplDb.getName(key.foreignTable()));
-            handleColumns(key.foreignColumns());
-            if (key.onDelete() != ForeignKeyAction.DEFAULT)
-                mSql.append(" ON DELETE ").append(key.onDelete().toString().replace('_', ' '));
-            if (key.onUpdate() != ForeignKeyAction.DEFAULT)
-                mSql.append(" ON UPDATE ").append(key.onUpdate().toString().replace('_', ' '));
-            if (key.deferrable())
-                mSql.append(" DEFERRABLE INITIALLY DEFERRED");
-        }
+        mSql.append(" REFERENCES ").append(SimplDb.getName(key.foreignTable()));
+        handleColumns(key.foreignColumns());
+        if (key.onDelete() != ForeignKeyAction.DEFAULT)
+            mSql.append(" ON DELETE ").append(key.onDelete().toString().replace('_', ' '));
+        if (key.onUpdate() != ForeignKeyAction.DEFAULT)
+            mSql.append(" ON UPDATE ").append(key.onUpdate().toString().replace('_', ' '));
+        if (key.deferrable())
+            mSql.append(" DEFERRABLE INITIALLY DEFERRED");
     }
 
     private boolean handleColumns(String[] columns) {
