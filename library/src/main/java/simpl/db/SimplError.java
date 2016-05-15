@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 
 import simpl.db.query.Query;
 import simpl.db.table.Column;
+import simpl.db.table.ForeignKey;
 import simpl.db.table.Table;
 
 /**
@@ -58,5 +59,15 @@ public class SimplError extends RuntimeException {
      */
     public SimplError(Class<? extends SimplDef> cls, Class<? extends Annotation> ann) {
         super("Annotation " + ann.getSimpleName() + " not present on Class " + cls.getSimpleName());
+    }
+
+    /**
+     * Constructs a new {@code SimplError} indicating missing columns.
+     *
+     * @param ann missing at {@code cls}
+     * @see ForeignKey
+     */
+    public SimplError(Class<? extends Annotation> ann) {
+        super("Annotation " + ann.getSimpleName() + " must define a positive number of columns.");
     }
 }

@@ -16,7 +16,6 @@
 
 package simpl.db;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -34,13 +33,13 @@ import simpl.db.SimplDb.Insert.Callback;
 import simpl.db.table.TableDef;
 import simpl.db.table.v2.ColumnTest;
 import simpl.db.table.v2.DatabaseTest;
+import simpl.db.table.v2.ForeignKeyTest;
 import simpl.db.table.v2.TableTest;
 import simpl.db.table.v2.TypeTest;
 
 import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static simpl.db.SimplDb.getName;
@@ -53,6 +52,7 @@ import static simpl.db.table.v2.ColumnTest.DEFAULT;
 import static simpl.db.table.v2.ColumnTest.NOT_NULL;
 import static simpl.db.table.v2.ColumnTest.UNIQUE;
 import static simpl.db.table.v2.ColumnTest.UNIQUE$;
+import static simpl.db.table.v2.ForeignKeyTest.FOREIGN_KEY;
 import static simpl.db.table.v2.TableTest.DATA;
 import static simpl.db.table.v2.TableTest.INFO;
 import static simpl.db.table.v2.TableTest.KEEP;
@@ -65,10 +65,12 @@ import static simpl.db.table.v2.TypeTest.TEXT;
 
 public class SimplDbTest {
     static final String COLUMN_TABLE = getName(ColumnTest.class);
+    static final String FOREIGN_KEY_TABLE = getName(ForeignKeyTest.class);
     static final String TYPE_TABLE = getName(TypeTest.class);
 
-    final Insert mColumnInsert = new Insert(ColumnTest.class, new ContentValues());
-    final Insert mTypedInsert = new Insert(TypeTest.class, new ContentValues());
+    final Insert mColumnInsert = new Insert(ColumnTest.class, null);
+    final Insert mForeignKeyInsert = new Insert(ForeignKeyTest.class, null);
+    final Insert mTypedInsert = new Insert(TypeTest.class, null);
 
     SimplDb mSimplDb;
     Cursor mCursor;
@@ -84,6 +86,7 @@ public class SimplDbTest {
     public void createDatabase() {
         mSimplDb = new DatabaseTest(getContext());
         mColumnInsert.contentValues.clear();
+        mForeignKeyInsert.contentValues.clear();
         mTypedInsert.contentValues.clear();
     }
 
@@ -117,7 +120,7 @@ public class SimplDbTest {
         insertAndQuery(mColumnInsert, COLUMN_TABLE);
 
         try {
-            assertFalse(mCursor.moveToFirst());
+            assertEquals(0, mCursor.getCount());
         } finally {
             mCursor.close();
         }
@@ -130,7 +133,7 @@ public class SimplDbTest {
         insertAndQuery(mColumnInsert, COLUMN_TABLE);
 
         try {
-            assertFalse(mCursor.moveToFirst());
+            assertEquals(0, mCursor.getCount());
         } finally {
             mCursor.close();
         }
@@ -175,6 +178,47 @@ public class SimplDbTest {
         try {
             assertTrue(mCursor.moveToFirst());
             assertEquals("TODO", mCursor.getString(mCursor.getColumnIndex(COLLATE)));
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
+    public void columnForeignKey() throws Exception {
+        mForeignKeyInsert.contentValues.put(FOREIGN_KEY, 1);
+        insertAndQuery(mForeignKeyInsert, FOREIGN_KEY_TABLE);
+
+        try {
+            assertEquals(0, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+
+        mTypedInsert.contentValues.put(INTEGER, 1);
+        insertAndQuery(mTypedInsert, TYPE_TABLE);
+
+        try {
+            assertEquals(1, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+
+        insertAndQuery(mForeignKeyInsert, FOREIGN_KEY_TABLE);
+
+        try {
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(FOREIGN_KEY)));
+        } finally {
+            mCursor.close();
+        }
+
+        SQLiteDatabase db = mSimplDb.getWritableDatabase();
+        assertTrue(db.delete(TYPE_TABLE, "1", null) > 0);
+
+        query(COLUMN_TABLE, null);
+
+        try {
+            assertEquals(0, mCursor.getCount());
         } finally {
             mCursor.close();
         }

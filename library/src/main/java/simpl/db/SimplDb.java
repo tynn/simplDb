@@ -23,6 +23,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -641,6 +642,14 @@ public abstract class SimplDb implements SimplDef {
     }
 
     /**
+     * Gets called at the end of {@link SQLiteOpenHelperImpl#onConfigure(SQLiteDatabase)}.
+     *
+     * @param db to modify
+     */
+    protected void onConfigure(SQLiteDatabase db) {
+    }
+
+    /**
      * Gets called at the end of {@link SQLiteOpenHelperImpl#onCreate(SQLiteDatabase)}.
      *
      * @param db to modify
@@ -687,6 +696,22 @@ public abstract class SimplDb implements SimplDef {
         protected SQLiteOpenHelperImpl(Context context) {
             super(context.getApplicationContext(), name, onCreateCursorFactory(context), version);
             mTable = new TableSql();
+        }
+
+        /**
+         * Configures this database to use foreign keys.
+         *
+         * @param db to configure
+         */
+        @Override
+        public void onConfigure(SQLiteDatabase db) {
+            if (!db.isReadOnly())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    db.setForeignKeyConstraintsEnabled(true);
+                else
+                    db.execSQL("PRAGMA foreign_keys=ON;");
+
+            SimplDb.this.onConfigure(db);
         }
 
         /**

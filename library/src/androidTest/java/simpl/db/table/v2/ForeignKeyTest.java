@@ -16,14 +16,18 @@
 
 package simpl.db.table.v2;
 
-import android.content.Context;
+import simpl.db.table.Column;
+import simpl.db.table.ForeignKey;
+import simpl.db.table.Table;
+import simpl.db.table.TableDef;
+import simpl.db.table.TableDef.WithID;
 
-import simpl.db.Database;
-import simpl.db.SimplDb;
+import static simpl.db.table.ColumnType.INTEGER;
+import static simpl.db.table.ForeignKeyAction.CASCADE;
 
-@Database(tables = {ColumnTest.class, TableTest.class, TypeTest.class, ForeignKeyTest.class}, version = 2)
-public class DatabaseTest extends SimplDb {
-    public DatabaseTest(Context context) {
-        super(context);
-    }
+@Table
+public interface ForeignKeyTest extends TableDef, WithID {
+    @Column(type = INTEGER)
+    @ForeignKey(foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
+    String FOREIGN_KEY = "foreign_key";
 }

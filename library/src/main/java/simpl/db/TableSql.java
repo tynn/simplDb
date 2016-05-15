@@ -30,6 +30,8 @@ import simpl.db.table.Collate;
 import simpl.db.table.Column;
 import simpl.db.table.ConflictClause;
 import simpl.db.table.Default;
+import simpl.db.table.ForeignKey;
+import simpl.db.table.ForeignKeyAction;
 import simpl.db.table.NotNull;
 import simpl.db.table.PrimaryKey;
 import simpl.db.table.Sortorder;
@@ -71,6 +73,7 @@ final class TableSql {
             delimiter |= addColumn(field, delimiter ? ", " : "");
 
         handleCheck(tableDef);
+        handleForeignKey(tableDef);
 
         mSql.append(")");
         if (WithoutRowid.SUPPORTED && tableDef.getAnnotation(WithoutRowid.class) != null)
@@ -106,6 +109,7 @@ final class TableSql {
                     handleCheck(field);
                     handleDefault(field);
                     handleCollate(field);
+                    handleForeignKey(field);
 
                     return true;
                 }
@@ -188,6 +192,44 @@ final class TableSql {
     private void handleCheck(Check check) {
         if (check != null)
             mSql.append(" CHECK (").append(check.expression()).append(')');
+    }
+
+    private void handleForeignKey(Class<? extends TableDef> tableDef) {
+        ForeignKey foreignKey = tableDef.getAnnotation(ForeignKey.class);
+        if (foreignKey != null) {
+            mSql.append(" FOREIGN KEY");
+            if (!handleColumns(foreignKey.columns()))
+                throw new SimplError(ForeignKey.class);
+            handleForeignKey(foreignKey);
+        }
+    }
+
+    private void handleForeignKey(Field field) {
+        handleForeignKey(field.getAnnotation(ForeignKey.class));
+    }
+
+    private void handleForeignKey(ForeignKey key) {
+        if (key != null) {
+            mSql.append(" REFERENCES ").append(SimplDb.getName(key.foreignTable()));
+            handleColumns(key.foreignColumns());
+            if (key.onDelete() != ForeignKeyAction.DEFAULT)
+                mSql.append(" ON DELETE ").append(key.onDelete().toString().replace('_', ' '));
+            if (key.onUpdate() != ForeignKeyAction.DEFAULT)
+                mSql.append(" ON UPDATE ").append(key.onUpdate().toString().replace('_', ' '));
+            if (key.deferrable())
+                mSql.append(" DEFERRABLE INITIALLY DEFERRED");
+        }
+    }
+
+    private boolean handleColumns(String[] columns) {
+        if (columns.length == 0)
+            return false;
+
+        mSql.append(" (").append(columns[0]);
+        for (int i = 1; i < columns.length; i++)
+            mSql.append(", ").append(columns[i]);
+        mSql.append(')');
+        return true;
     }
 
     String getName() {

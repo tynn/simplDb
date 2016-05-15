@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v2;
+package simpl.db.table;
 
-import android.content.Context;
-
-import simpl.db.Database;
-import simpl.db.SimplDb;
-
-@Database(tables = {ColumnTest.class, TableTest.class, TypeTest.class, ForeignKeyTest.class}, version = 2)
-public class DatabaseTest extends SimplDb {
-    public DatabaseTest(Context context) {
-        super(context);
-    }
+/**
+ * Enumeration of actions for foreign key ON DELETE and ON UPDATE.
+ */
+public enum ForeignKeyAction {
+    DEFAULT, NO_ACTION, RESTRICT, SET_NULL, SET_DEFAULT, CASCADE
 }
