@@ -52,7 +52,8 @@ import static simpl.db.table.v2.ColumnTest.DEFAULT;
 import static simpl.db.table.v2.ColumnTest.NOT_NULL;
 import static simpl.db.table.v2.ColumnTest.UNIQUE;
 import static simpl.db.table.v2.ColumnTest.UNIQUE$;
-import static simpl.db.table.v2.ForeignKeyTest.FOREIGN_KEY;
+import static simpl.db.table.v2.ForeignKeyTest.FOREIGN_KEY1;
+import static simpl.db.table.v2.ForeignKeyTest.FOREIGN_KEY2;
 import static simpl.db.table.v2.TableTest.DATA;
 import static simpl.db.table.v2.TableTest.INFO;
 import static simpl.db.table.v2.TableTest.KEEP;
@@ -66,10 +67,12 @@ import static simpl.db.table.v2.TypeTest.TEXT;
 public class SimplDbTest {
     static final String COLUMN_TABLE = getName(ColumnTest.class);
     static final String FOREIGN_KEY_TABLE = getName(ForeignKeyTest.class);
+    static final String TABLE_TABLE = getName(TableTest.class);
     static final String TYPE_TABLE = getName(TypeTest.class);
 
     final Insert mColumnInsert = new Insert(ColumnTest.class, null);
     final Insert mForeignKeyInsert = new Insert(ForeignKeyTest.class, null);
+    final Insert mTableInsert = new Insert(TableTest.class, null);
     final Insert mTypedInsert = new Insert(TypeTest.class, null);
 
     SimplDb mSimplDb;
@@ -87,6 +90,7 @@ public class SimplDbTest {
         mSimplDb = new DatabaseTest(getContext());
         mColumnInsert.contentValues.clear();
         mForeignKeyInsert.contentValues.clear();
+        mTableInsert.contentValues.clear();
         mTypedInsert.contentValues.clear();
     }
 
@@ -185,7 +189,7 @@ public class SimplDbTest {
 
     @Test
     public void columnForeignKey() throws Exception {
-        mForeignKeyInsert.contentValues.put(FOREIGN_KEY, 1);
+        mForeignKeyInsert.contentValues.put(FOREIGN_KEY1, 1);
         insertAndQuery(mForeignKeyInsert, FOREIGN_KEY_TABLE);
 
         try {
@@ -207,7 +211,70 @@ public class SimplDbTest {
 
         try {
             assertTrue(mCursor.moveToFirst());
-            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(FOREIGN_KEY)));
+            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(FOREIGN_KEY1)));
+        } finally {
+            mCursor.close();
+        }
+
+        SQLiteDatabase db = mSimplDb.getWritableDatabase();
+        assertTrue(db.delete(TYPE_TABLE, "1", null) > 0);
+
+        query(COLUMN_TABLE, null);
+
+        try {
+            assertEquals(0, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
+    public void tableCheck() throws Exception {
+        mTableInsert.contentValues.put(INFO, "test");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        try {
+            assertEquals(0, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+
+        mTableInsert.contentValues.put(INFO, "TEST");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        try {
+            assertTrue(mCursor.moveToFirst());
+            assertEquals("TEST", mCursor.getString(mCursor.getColumnIndex(INFO)));
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
+    public void tableForeignKey() throws Exception {
+        mForeignKeyInsert.contentValues.put(FOREIGN_KEY2, 1);
+        insertAndQuery(mForeignKeyInsert, FOREIGN_KEY_TABLE);
+
+        try {
+            assertEquals(0, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+
+        mTypedInsert.contentValues.put(INTEGER, 1);
+        insertAndQuery(mTypedInsert, TYPE_TABLE);
+
+        try {
+            assertEquals(1, mCursor.getCount());
+        } finally {
+            mCursor.close();
+        }
+
+        insertAndQuery(mForeignKeyInsert, FOREIGN_KEY_TABLE);
+
+        try {
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(FOREIGN_KEY2)));
         } finally {
             mCursor.close();
         }

@@ -26,8 +26,12 @@ import static simpl.db.table.ColumnType.INTEGER;
 import static simpl.db.table.ForeignKeyAction.CASCADE;
 
 @Table
+@ForeignKey(columns = ForeignKeyTest.FOREIGN_KEY2, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
 public interface ForeignKeyTest extends TableDef, WithID {
     @Column(type = INTEGER)
     @ForeignKey(foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
-    String FOREIGN_KEY = "foreign_key";
+    String FOREIGN_KEY1 = "foreign_key1";
+
+    @Column(type = INTEGER)
+    String FOREIGN_KEY2 = "foreign_key2";
 }

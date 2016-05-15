@@ -16,22 +16,28 @@
 
 package simpl.db.table.v2;
 
+import simpl.db.table.Check;
 import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
 
+import static simpl.db.table.ColumnType.BLOB;
+import static simpl.db.table.ColumnType.INTEGER;
+import static simpl.db.table.ColumnType.NUMERIC;
+import static simpl.db.table.ColumnType.TEXT;
+
 @Table
+@Check(expression = TableTest.INFO + "!=\"test\"")
 public interface TableTest extends TableDef {
-    @Column(type = ColumnType.BLOB)
+    @Column(type = BLOB)
     String DATA = "data";
 
-    @Column(type = ColumnType.INTEGER)
+    @Column(type = INTEGER)
     String VALUE = "value";
 
-    @Column(type = ColumnType.TEXT)
+    @Column(type = TEXT)
     String INFO = "info";
 
-    @Column(type = ColumnType.NUMERIC)
+    @Column(type = NUMERIC)
     String KEEP = "keep";
 }
