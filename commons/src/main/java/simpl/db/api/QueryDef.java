@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
-
-import android.database.Cursor;
-
-import simpl.db.SimplDb;
-import simpl.db.SimplDef;
-import simpl.db.SimplQuery;
-import simpl.db.table.TableDef;
+package simpl.db.api;
 
 /**
  * {@code QueryDef} is the base class for all simplDb queries.
@@ -29,21 +22,6 @@ import simpl.db.table.TableDef;
  * Implementations must also be annotated with {@link Query} or implement {@link TableDef}.
  * If the {@code Query} annotation is not used, the query returns all columns and rows of the table.
  * </p>
- *
- * @see SimplQuery#get(Class)
  */
 public interface QueryDef extends SimplDef {
-
-    /**
-     * {@code Callback} for notification of a finished asynchronous query.
-     */
-    interface Callback {
-        /**
-         * @param cursor   returned for {@code queryDef} with applied {@code filter}
-         * @param queryDef executed
-         * @param filter   applied
-         * @param db       queried
-         */
-        void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db);
-    }
 }

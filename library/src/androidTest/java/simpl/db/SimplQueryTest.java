@@ -28,9 +28,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import simpl.db.SimplQuery.Filter;
-import simpl.db.query.Join;
-import simpl.db.query.Query;
-import simpl.db.query.QueryDef;
+import simpl.db.api.Join;
+import simpl.db.api.Query;
+import simpl.db.api.QueryDef;
 import simpl.db.db.v10.DatabaseTest;
 import simpl.db.db.v10.JoinTest;
 import simpl.db.db.v10.QueryTest;
@@ -40,9 +40,9 @@ import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static simpl.db.SimplQuery.get;
-import static simpl.db.query.JoinType.CROSS;
-import static simpl.db.query.JoinType.LEFT;
-import static simpl.db.table.Sortorder.DESC;
+import static simpl.db.api.JoinType.CROSS;
+import static simpl.db.api.JoinType.LEFT;
+import static simpl.db.api.Sortorder.DESC;
 
 public class SimplQueryTest {
     static SimplDb sSimplDb;

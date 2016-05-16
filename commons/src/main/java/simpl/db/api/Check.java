@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
-public @interface Collate {
-    CollationName collationName();
+@Target(value = {ElementType.TYPE, ElementType.FIELD})
+public @interface Check {
+    String expression();
 }

@@ -25,20 +25,20 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import simpl.db.table.Check;
-import simpl.db.table.Collate;
-import simpl.db.table.Column;
-import simpl.db.table.ConflictClause;
-import simpl.db.table.Default;
-import simpl.db.table.ForeignKey;
-import simpl.db.table.ForeignKeyAction;
-import simpl.db.table.NotNull;
-import simpl.db.table.PrimaryKey;
-import simpl.db.table.Sortorder;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.Unique;
-import simpl.db.table.WithoutRowid;
+import simpl.db.api.Check;
+import simpl.db.api.Collate;
+import simpl.db.api.Column;
+import simpl.db.api.ConflictClause;
+import simpl.db.api.Default;
+import simpl.db.api.ForeignKey;
+import simpl.db.api.ForeignKeyAction;
+import simpl.db.api.NotNull;
+import simpl.db.api.PrimaryKey;
+import simpl.db.api.Sortorder;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.Unique;
+import simpl.db.api.WithoutRowid;
 
 final class TableSql {
     private static final String MSG_FORMAT = "Column %1$s in %2$s must match " +

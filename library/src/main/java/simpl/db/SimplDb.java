@@ -41,8 +41,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
-import simpl.db.query.QueryDef;
-import simpl.db.table.TableDef;
+import simpl.db.api.Database;
+import simpl.db.api.QueryDef;
+import simpl.db.api.SimplDef;
+import simpl.db.api.TableDef;
 
 /**
  * {@code SimplDb} is the base class for all simplDb databases.
@@ -72,7 +74,7 @@ public abstract class SimplDb implements SimplDef {
     };
 
     private static final WeakHashMap<SimplDb, Boolean> sBlocksQuitter = new WeakHashMap<>();
-    private static final HashMap<Class<? extends TableDef>, HashMap<TableDef.Observer, HashSet<Class<? extends QueryDef>>>> sTableObservers = new HashMap<>();
+    private static final HashMap<Class<? extends TableDef>, HashMap<Observer, HashSet<Class<? extends QueryDef>>>> sTableObservers = new HashMap<>();
 
     private final Context mContext;
     private final SQLiteOpenHelper mSQLiteOpenHelper;
@@ -213,18 +215,18 @@ public abstract class SimplDb implements SimplDef {
 	/* Table update handling */
 
     /**
-     * Registers a {@link TableDef.Observer} to be notified of any changes made to this database through this {@code SimplDb}.
+     * Registers a {@link Observer} to be notified of any changes made to this database through this {@code SimplDb}.
      * The {@code tableObserver} gets registered to any table of {@code queryDef}.
      *
      * @param tableObserver to notify of changes
-     * @param queryDef      to be used in {@link TableDef.Observer#onTableChanged(Class, SimplDb)}
-     * @see #unregisterTableObserver(TableDef.Observer, Class)
+     * @param queryDef      to be used in {@link Observer#onTableChanged(Class, SimplDb)}
+     * @see #unregisterTableObserver(Observer, Class)
      */
-    public final void registerTableObserver(TableDef.Observer tableObserver, Class<? extends QueryDef> queryDef) {
+    public final void registerTableObserver(Observer tableObserver, Class<? extends QueryDef> queryDef) {
         synchronized (sTableObservers) {
             SimplQuery query = SimplQuery.get(queryDef);
 
-            HashMap<TableDef.Observer, HashSet<Class<? extends QueryDef>>> observers;
+            HashMap<Observer, HashSet<Class<? extends QueryDef>>> observers;
             HashSet<Class<? extends QueryDef>> queries;
             for (Class<? extends TableDef> tableDef : query.getTables()) {
                 observers = sTableObservers.get(tableDef);
@@ -248,19 +250,19 @@ public abstract class SimplDb implements SimplDef {
     }
 
     /**
-     * Unregisters a {@link TableDef.Observer} from being notified of changes.
+     * Unregisters a {@link Observer} from being notified of changes.
      * The {@code tableObserver} gets unregistered from any table of {@code queryDef}.
      *
      * @param tableObserver to remove
      * @param queryDef      to remove the {@code tableObserver} from
-     * @see #registerTableObserver(TableDef.Observer, Class)
-     * @see #unregisterTableObserver(TableDef.Observer)
+     * @see #registerTableObserver(Observer, Class)
+     * @see #unregisterTableObserver(Observer)
      */
-    public final void unregisterTableObserver(TableDef.Observer tableObserver, Class<? extends QueryDef> queryDef) {
+    public final void unregisterTableObserver(Observer tableObserver, Class<? extends QueryDef> queryDef) {
         synchronized (sTableObservers) {
             SimplQuery query = SimplQuery.get(queryDef);
 
-            HashMap<TableDef.Observer, HashSet<Class<? extends QueryDef>>> observers;
+            HashMap<Observer, HashSet<Class<? extends QueryDef>>> observers;
             HashSet<Class<? extends QueryDef>> queries;
             for (Class<? extends TableDef> tableDef : query.getTables()) {
                 observers = sTableObservers.get(tableDef);
@@ -277,24 +279,24 @@ public abstract class SimplDb implements SimplDef {
     }
 
     /**
-     * Unregisters a {@link TableDef.Observer} from being notified of changes.
+     * Unregisters a {@link Observer} from being notified of changes.
      * The {@code tableObserver} gets unregistered from all tables.
      *
      * @param tableObserver to remove
-     * @see #registerTableObserver(TableDef.Observer, Class)
-     * @see #unregisterTableObserver(TableDef.Observer, Class)
+     * @see #registerTableObserver(Observer, Class)
+     * @see #unregisterTableObserver(Observer, Class)
      */
-    public final void unregisterTableObserver(TableDef.Observer tableObserver) {
+    public final void unregisterTableObserver(Observer tableObserver) {
         synchronized (sTableObservers) {
-            for (HashMap<TableDef.Observer, ?> observers : sTableObservers.values())
+            for (HashMap<Observer, ?> observers : sTableObservers.values())
                 observers.remove(tableObserver);
         }
     }
 
-    private void sendTableChanged(Map<TableDef.Observer, HashSet<Class<? extends QueryDef>>> observers) {
+    private void sendTableChanged(Map<Observer, HashSet<Class<? extends QueryDef>>> observers) {
         if (observers != null)
-            for (Entry<TableDef.Observer, HashSet<Class<? extends QueryDef>>> entry : observers.entrySet()) {
-                TableDef.Observer tableObserver = entry.getKey();
+            for (Entry<Observer, HashSet<Class<? extends QueryDef>>> entry : observers.entrySet()) {
+                Observer tableObserver = entry.getKey();
 
                 for (Class<? extends QueryDef> queryDef : entry.getValue())
                     tableObserver.onTableChanged(queryDef, this);
@@ -308,16 +310,16 @@ public abstract class SimplDb implements SimplDef {
     }
 
     private void sendTableChanged(Collection<Class<? extends TableDef>> tableDefs) {
-        WeakHashMap<TableDef.Observer, HashSet<Class<? extends QueryDef>>> observers = new WeakHashMap<>();
+        WeakHashMap<Observer, HashSet<Class<? extends QueryDef>>> observers = new WeakHashMap<>();
 
         synchronized (sTableObservers) {
-            HashMap<TableDef.Observer, HashSet<Class<? extends QueryDef>>> tableObservers;
+            HashMap<Observer, HashSet<Class<? extends QueryDef>>> tableObservers;
             for (Class<? extends TableDef> tableDef : tableDefs) {
                 tableObservers = sTableObservers.get(tableDef);
 
                 if (tableObservers != null)
-                    for (Entry<TableDef.Observer, HashSet<Class<? extends QueryDef>>> entry : tableObservers.entrySet()) {
-                        TableDef.Observer tableObserver = entry.getKey();
+                    for (Entry<Observer, HashSet<Class<? extends QueryDef>>> entry : tableObservers.entrySet()) {
+                        Observer tableObserver = entry.getKey();
 
                         HashSet<Class<? extends QueryDef>> queries = observers.get(tableObserver);
                         if (queries == null) {
@@ -334,6 +336,17 @@ public abstract class SimplDb implements SimplDef {
         sendTableChanged(observers);
     }
 
+    /**
+     * {@code Observer} for changes to a table of the databases.
+     */
+    public interface Observer {
+        /**
+         * @param queryDef to execute
+         * @param db       which changed
+         */
+        void onTableChanged(Class<? extends QueryDef> queryDef, SimplDb db);
+    }
+
 	/* Database interaction */
 
     /**
@@ -341,7 +354,7 @@ public abstract class SimplDb implements SimplDef {
      * @param filter   to use with the query
      * @param callback to notify
      */
-    public void query(final Class<? extends QueryDef> queryDef, final SimplQuery.Filter filter, final QueryDef.Callback callback) {
+    public void query(final Class<? extends QueryDef> queryDef, final SimplQuery.Filter filter, final SimplQuery.Callback callback) {
         if (isUiThread()) {
             runOnWorkerThread(new Runnable() {
                 @Override

@@ -17,10 +17,10 @@
 package simpl.db.db;
 
 
-import simpl.db.query.Join;
-import simpl.db.query.JoinType;
-import simpl.db.query.Query;
-import simpl.db.query.QueryDef;
+import simpl.db.api.Join;
+import simpl.db.api.JoinType;
+import simpl.db.api.Query;
+import simpl.db.api.QueryDef;
 
 @Query(table = TestTable.class, columns = TestTable.TEST, limit = 3)
 @Join(table = TestTable.I.class, columns = TestTable.I.TEST2, type = JoinType.INNER, on = TestJoin.ON)

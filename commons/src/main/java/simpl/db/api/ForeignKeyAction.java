@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db;
+package simpl.db.api;
 
 /**
- * {@code SimplDef} is the base interface for all simplDb types.
- * The implementing class name also defines the name of the type in the database.
- *
- * @see SimplDb#getName(Class)
+ * Enumeration of actions for foreign key ON DELETE and ON UPDATE.
  */
-public interface SimplDef {
+public enum ForeignKeyAction {
+    DEFAULT, NO_ACTION, RESTRICT, SET_NULL, SET_DEFAULT, CASCADE
 }

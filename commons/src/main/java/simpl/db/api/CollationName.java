@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 /**
- * Enumeration of possible conflict resolve clauses.
+ * Enumeration of possible collating functions.
  */
-public enum ConflictClause {
-    DEFAULT, ROLLBACK, ABORT, FAIL, IGNORE, REPLACE
+public enum CollationName {
+    BINARY, NOCASE, RTRIM
 }

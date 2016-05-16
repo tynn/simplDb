@@ -16,15 +16,15 @@
 
 package simpl.db.db.v2;
 
-import simpl.db.table.Check;
-import simpl.db.table.Column;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
+import simpl.db.api.Check;
+import simpl.db.api.Column;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
 
-import static simpl.db.table.ColumnType.BLOB;
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ColumnType.NUMERIC;
-import static simpl.db.table.ColumnType.TEXT;
+import static simpl.db.api.ColumnType.BLOB;
+import static simpl.db.api.ColumnType.INTEGER;
+import static simpl.db.api.ColumnType.NUMERIC;
+import static simpl.db.api.ColumnType.TEXT;
 
 @Table
 @Check(expression = TableTest.INFO + "!=\"test\"")

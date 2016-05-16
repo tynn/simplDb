@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
-/**
- * Enumeration of general types for columns.
- */
-public enum ColumnType {
-    BLOB, INTEGER, NUMERIC, REAL, TEXT
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Documented
+@Retention(value = RetentionPolicy.RUNTIME)
+@Target(value = {ElementType.FIELD})
+public @interface NotNull {
+    ConflictClause conflictClause() default ConflictClause.DEFAULT;
 }

@@ -23,8 +23,9 @@ import android.database.Cursor;
 import android.os.Build;
 
 import simpl.db.SimplDb;
+import simpl.db.SimplQuery;
 import simpl.db.SimplQuery.Filter;
-import simpl.db.table.TableDef;
+import simpl.db.api.QueryDef;
 
 /**
  * {@code QueryLoader} implements a {@link Loader} for {@link Cursor} returned by a query.
@@ -40,14 +41,14 @@ public class QueryLoader extends Loader<Cursor> {
     private final SimplDb mDb;
     private Cursor mData;
 
-    private final QueryDef.Callback mQueryDefCallback = new QueryDef.Callback() {
+    private final SimplQuery.Callback mQueryDefCallback = new SimplQuery.Callback() {
         @Override
         public void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, Filter filter, SimplDb db) {
             deliverCursor(cursor);
         }
     };
 
-    private final TableDef.Observer mTableDefObserver = new TableDef.Observer() {
+    private final SimplDb.Observer mTableDefObserver = new SimplDb.Observer() {
         @Override
         public void onTableChanged(Class<? extends QueryDef> queryDef, SimplDb db) {
             requestCursor();

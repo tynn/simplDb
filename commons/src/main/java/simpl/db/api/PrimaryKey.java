@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,19 +22,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Annotation to define a column in a table.
- * <p>
- * The column field must be defined for a {@link TableDef} implementation must match
- * <br>{@code public static final String COLUMN_NAME = "column_name";}
- * </p>
- */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD})
-public @interface Column {
-    /**
-     * @return the data type of the column
-     */
-    ColumnType type();
+public @interface PrimaryKey {
+    boolean autoincrement() default false;
+
+    Sortorder sortorder() default Sortorder.DEFAULT;
+
+    ConflictClause conflictClause() default ConflictClause.DEFAULT;
 }

@@ -16,12 +16,12 @@
 
 package simpl.db.db.v10;
 
-import simpl.db.query.QueryDef;
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithCurrentTimestamp;
+import simpl.db.api.QueryDef;
+import simpl.db.api.Column;
+import simpl.db.api.ColumnType;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithCurrentTimestamp;
 
 @Table
 public interface TableTest extends QueryDef, TableDef, WithCurrentTimestamp {

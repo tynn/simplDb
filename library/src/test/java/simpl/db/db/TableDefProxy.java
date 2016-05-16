@@ -16,7 +16,7 @@
 
 package simpl.db.db;
 
-import simpl.db.table.TableDef;
+import simpl.db.api.TableDef;
 
 public interface TableDefProxy extends TableDef {
 }

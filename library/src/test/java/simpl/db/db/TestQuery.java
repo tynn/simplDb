@@ -17,8 +17,8 @@
 package simpl.db.db;
 
 
-import simpl.db.query.Query;
-import simpl.db.query.QueryDef;
+import simpl.db.api.Query;
+import simpl.db.api.QueryDef;
 
 @Query(table = TestTable.class, columns = TestTable.TEST,
         selection = TestQuery.SELECTION, selectionArgs = TestTable.TEST,

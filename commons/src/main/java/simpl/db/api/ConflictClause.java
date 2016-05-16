@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 /**
- * Enumeration of actions for foreign key ON DELETE and ON UPDATE.
+ * Enumeration of possible conflict resolve clauses.
  */
-public enum ForeignKeyAction {
-    DEFAULT, NO_ACTION, RESTRICT, SET_NULL, SET_DEFAULT, CASCADE
+public enum ConflictClause {
+    DEFAULT, ROLLBACK, ABORT, FAIL, IGNORE, REPLACE
 }

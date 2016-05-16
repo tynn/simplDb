@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,9 +22,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation to define a table.
+ * <p>
+ * All implementations of {@link TableDef} must be annotated with {@code @Table}.
+ * </p>
+ */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE, ElementType.FIELD})
-public @interface Check {
-    String expression();
+@Target(value = {ElementType.TYPE})
+public @interface Table {
+    /**
+     * @return if table should be temporary
+     */
+    boolean temporary() default false;
+
+    /**
+     * @return if table should only be created if non-existing
+     */
+    boolean ifNotExists() default false;
 }

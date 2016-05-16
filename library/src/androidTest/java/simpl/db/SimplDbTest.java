@@ -30,7 +30,7 @@ import java.util.HashSet;
 
 import simpl.db.SimplDb.Insert;
 import simpl.db.SimplDb.Insert.Callback;
-import simpl.db.table.TableDef;
+import simpl.db.api.TableDef;
 import simpl.db.db.v2.ColumnTest;
 import simpl.db.db.v2.DatabaseTest;
 import simpl.db.db.v2.ForeignKeyTest;

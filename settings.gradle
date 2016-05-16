@@ -1,1 +1,4 @@
-include ':library', ':examples:minify'
+include ':library'
+include ':commons'
+include ':external'
+include ':examples:minify'

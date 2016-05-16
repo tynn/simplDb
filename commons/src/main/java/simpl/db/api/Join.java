@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,9 +22,39 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation to define a join clause of a query.
+ * <p>
+ * An implementation of {@link QueryDef} annotated with {@link @Query}
+ * may also be annotated with {@code @Join}.
+ * </p>
+ */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
-public @interface NotNull {
-    ConflictClause conflictClause() default ConflictClause.DEFAULT;
+@Target(value = {ElementType.TYPE})
+public @interface Join {
+    /**
+     * @return the table to join
+     */
+    Class<? extends TableDef> table();
+
+    /**
+     * @return the columns of the table to use
+     */
+    String[] columns();
+
+    /**
+     * @return join clause
+     */
+    String on();
+
+    /**
+     * @return join type
+     */
+    JoinType type() default JoinType.DEFAULT;
+
+    /**
+     * @return if it is a natural join
+     */
+    boolean natural() default false;
 }

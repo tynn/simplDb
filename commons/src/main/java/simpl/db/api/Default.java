@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
-
-
-import android.annotation.TargetApi;
-import android.os.Build;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,14 +22,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * The table should be defined without a rowid.
- * This requires the definition of a primary key column.
- */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE})
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public @interface WithoutRowid {
-    boolean SUPPORTED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+@Target(value = {ElementType.FIELD})
+public @interface Default {
+    String value();
+
+    boolean expression() default false;
+
+    String CURRENT_TIME = "CURRENT_TIME";
+    String CURRENT_DATE = "CURRENT_DATE";
+    String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 }

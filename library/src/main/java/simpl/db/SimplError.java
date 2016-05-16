@@ -18,10 +18,11 @@ package simpl.db;
 
 import java.lang.annotation.Annotation;
 
-import simpl.db.query.Query;
-import simpl.db.table.Column;
-import simpl.db.table.ForeignKey;
-import simpl.db.table.Table;
+import simpl.db.api.Column;
+import simpl.db.api.ForeignKey;
+import simpl.db.api.Query;
+import simpl.db.api.SimplDef;
+import simpl.db.api.Table;
 
 /**
  * {@code SimplError} indicates a contract violation or missing annotations.

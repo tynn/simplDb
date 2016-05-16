@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.api;
 
 /**
- * Enumeration of the supported join types.
+ * {@code SimplDef} is the base interface for all simplDb types.
+ * The implementing class name also defines the name of the type in the database.
  */
-public enum JoinType {
-    DEFAULT, LEFT, INNER, CROSS
+public interface SimplDef {
 }

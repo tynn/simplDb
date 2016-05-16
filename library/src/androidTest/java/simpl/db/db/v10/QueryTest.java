@@ -16,11 +16,11 @@
 
 package simpl.db.db.v10;
 
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithID;
+import simpl.db.api.Column;
+import simpl.db.api.ColumnType;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithID;
 
 @Table
 public interface QueryTest extends TableDef, WithID {

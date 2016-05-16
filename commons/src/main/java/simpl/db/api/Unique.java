@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -24,18 +24,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.TYPE, ElementType.FIELD})
-public @interface ForeignKey {
-    String[] columns() default {};
-
-    Class<? extends TableDef> foreignTable();
-
-    String[] foreignColumns() default {};
-
-    boolean deferrable() default false;
-
-    ForeignKeyAction onDelete() default ForeignKeyAction.DEFAULT;
-
-    ForeignKeyAction onUpdate() default ForeignKeyAction.DEFAULT;
-
+@Target(value = { ElementType.FIELD })
+public @interface Unique {
+	ConflictClause conflictClause() default ConflictClause.DEFAULT;
 }

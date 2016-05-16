@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,41 +22,53 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import simpl.db.table.TableDef;
-
 /**
- * Annotation to define a join clause of a query.
+ * Annotation to define a query of a database.
  * <p>
- * An implementation of {@link QueryDef} annotated with {@link @Query}
- * may also be annotated with {@code @Join}.
+ * Implementations of {@link QueryDef} may be annotated with {@code @Query}.
  * </p>
  */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface Join {
+public @interface Query {
     /**
-     * @return the table to join
+     * @return the table to query
      */
     Class<? extends TableDef> table();
 
     /**
-     * @return the columns of the table to use
+     * @return the columns to return
      */
     String[] columns();
 
     /**
-     * @return join clause
+     * @return selection filter
      */
-    String on();
+    String selection() default "";
 
     /**
-     * @return join type
+     * @return arguments for selection filter using {@code ?s}
      */
-    JoinType type() default JoinType.DEFAULT;
+    String[] selectionArgs() default {};
 
     /**
-     * @return if it is a natural join
+     * @return group by filter
      */
-    boolean natural() default false;
+    String groupBy() default "";
+
+    /**
+     * @return order by filter
+     */
+    String orderBy() default "";
+
+    /**
+     * @return having filter
+     */
+    String having() default "";
+
+    /**
+     * @return limit of rows to return
+     */
+    int limit() default 0;
 }

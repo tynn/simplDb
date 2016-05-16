@@ -17,7 +17,7 @@
 package simpl.db.db;
 
 import simpl.db.SimplQuery;
-import simpl.db.query.QueryDef;
+import simpl.db.api.QueryDef;
 
 @SuppressWarnings("unchecked")
 public class TestSimplQuery extends SimplQuery implements QueryDef {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Christian Schmitz
+ * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package android.os;
 
-/**
- * Enumeration of possible collating functions.
- */
-public enum CollationName {
-    BINARY, NOCASE, RTRIM
+public class Build {
+    public static class VERSION {
+        public static final int SDK_INT = 21 + (int) (3 * Math.random());
+    }
+
+    public static class VERSION_CODES {
+        public static final int LOLLIPOP = 21;
+    }
 }

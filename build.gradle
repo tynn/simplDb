@@ -16,6 +16,8 @@ allprojects {
     }
 }
 
+ext.group = "com.github.tynn.simpldb"
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

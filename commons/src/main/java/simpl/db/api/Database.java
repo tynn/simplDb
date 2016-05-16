@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.api;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,55 +22,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import simpl.db.table.TableDef;
+import simpl.db.api.TableDef;
 
 /**
- * Annotation to define a query of a database.
+ * Annotation to define tables and version of a database.
  * <p>
- * Implementations of {@link QueryDef} may be annotated with {@code @Query}.
+ * All implementations of {@code SimplDb} must be annotated with {@code @Database}.
  * </p>
  */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface Query {
+public @interface Database {
     /**
-     * @return the table to query
+     * @return the version of the database
      */
-    Class<? extends TableDef> table();
+    int version();
 
     /**
-     * @return the columns to return
+     * @return the tables of the database
      */
-    String[] columns();
-
-    /**
-     * @return selection filter
-     */
-    String selection() default "";
-
-    /**
-     * @return arguments for selection filter using {@code ?s}
-     */
-    String[] selectionArgs() default {};
-
-    /**
-     * @return group by filter
-     */
-    String groupBy() default "";
-
-    /**
-     * @return order by filter
-     */
-    String orderBy() default "";
-
-    /**
-     * @return having filter
-     */
-    String having() default "";
-
-    /**
-     * @return limit of rows to return
-     */
-    int limit() default 0;
+    Class<? extends TableDef>[] tables();
 }

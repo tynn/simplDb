@@ -16,16 +16,16 @@
 
 package simpl.db.db.v10;
 
-import simpl.db.table.Column;
-import simpl.db.table.Default;
-import simpl.db.table.NotNull;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithID;
-import simpl.db.table.Unique;
+import simpl.db.api.Column;
+import simpl.db.api.Default;
+import simpl.db.api.NotNull;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithID;
+import simpl.db.api.Unique;
 
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ColumnType.TEXT;
+import static simpl.db.api.ColumnType.INTEGER;
+import static simpl.db.api.ColumnType.TEXT;
 
 @Table
 public interface JoinTest extends TableDef, WithID {

@@ -16,21 +16,21 @@
 
 package simpl.db.db.v2;
 
-import simpl.db.table.Check;
-import simpl.db.table.Collate;
-import simpl.db.table.Column;
-import simpl.db.table.Default;
-import simpl.db.table.NotNull;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithID;
-import simpl.db.table.Unique;
+import simpl.db.api.Check;
+import simpl.db.api.Collate;
+import simpl.db.api.Column;
+import simpl.db.api.Default;
+import simpl.db.api.NotNull;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithID;
+import simpl.db.api.Unique;
 
 import static simpl.db.SimplDb.quote;
-import static simpl.db.table.CollationName.NOCASE;
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ColumnType.TEXT;
-import static simpl.db.table.ConflictClause.REPLACE;
+import static simpl.db.api.CollationName.NOCASE;
+import static simpl.db.api.ColumnType.INTEGER;
+import static simpl.db.api.ColumnType.TEXT;
+import static simpl.db.api.ConflictClause.REPLACE;
 
 @Table
 public interface ColumnTest extends TableDef, WithID {

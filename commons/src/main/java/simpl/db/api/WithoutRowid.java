@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package simpl.db;
+package simpl.db.api;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.annotation.TargetApi;
+import android.os.Build;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -26,26 +25,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import simpl.db.table.TableDef;
-
 /**
- * Annotation to define tables and version of a database.
- * <p>
- * All implementations of {@link SimplDb} must be annotated with {@code @Database}.
- * </p>
+ * The table should be defined without a rowid.
+ * This requires the definition of a primary key column.
  */
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.TYPE})
-public @interface Database {
-    /**
-     * @return the version of the database
-     * @see SQLiteOpenHelper#SQLiteOpenHelper(Context, String, SQLiteDatabase.CursorFactory, int)
-     */
-    int version();
-
-    /**
-     * @return the tables of the database
-     */
-    Class<? extends TableDef>[] tables();
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+public @interface WithoutRowid {
+    boolean SUPPORTED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
 }

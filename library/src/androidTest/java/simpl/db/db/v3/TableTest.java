@@ -16,10 +16,10 @@
 
 package simpl.db.db.v3;
 
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
+import simpl.db.api.Column;
+import simpl.db.api.ColumnType;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
 
 @Table
 public interface TableTest extends TableDef {

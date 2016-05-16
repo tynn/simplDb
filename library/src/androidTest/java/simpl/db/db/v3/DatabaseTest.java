@@ -18,7 +18,7 @@ package simpl.db.db.v3;
 
 import android.content.Context;
 
-import simpl.db.Database;
+import simpl.db.api.Database;
 import simpl.db.SimplDb;
 
 @Database(tables = {TableTest.class}, version = 3)

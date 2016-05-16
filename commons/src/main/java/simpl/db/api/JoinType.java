@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
 /**
- * Enumeration of possible sort ordering.
+ * Enumeration of the supported join types.
  */
-public enum Sortorder {
-    DEFAULT, ASC, DESC
+public enum JoinType {
+    DEFAULT, LEFT, INNER, CROSS
 }

@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
+package simpl.db.api;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Documented
-@Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
-public @interface Default {
-    String value();
-
-    boolean expression() default false;
-
-    String CURRENT_TIME = "CURRENT_TIME";
-    String CURRENT_DATE = "CURRENT_DATE";
-    String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
+/**
+ * Enumeration of general types for columns.
+ */
+public enum ColumnType {
+    BLOB, INTEGER, NUMERIC, REAL, TEXT
 }

@@ -16,15 +16,15 @@
 
 package simpl.db.min;
 
-import simpl.db.query.QueryDef;
-import simpl.db.table.Column;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithCurrentTimestamp;
-import simpl.db.table.TableDef.WithID;
+import simpl.db.api.QueryDef;
+import simpl.db.api.Column;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithCurrentTimestamp;
+import simpl.db.api.TableDef.WithID;
 
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ColumnType.TEXT;
+import static simpl.db.api.ColumnType.INTEGER;
+import static simpl.db.api.ColumnType.TEXT;
 
 @Table
 interface ExamplTable extends QueryDef, TableDef, WithID, WithCurrentTimestamp {

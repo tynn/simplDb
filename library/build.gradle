@@ -22,15 +22,13 @@ android {
 }
 
 dependencies {
+    compile project(':commons')
     testCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.4.1'
 }
 
-
 // android maven exports
-
 apply plugin: 'com.github.dcendents.android-maven'
-group = "com.github.tynn"
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs

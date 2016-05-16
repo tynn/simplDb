@@ -19,7 +19,7 @@ package simpl.db.db.v21;
 import android.annotation.TargetApi;
 import android.content.Context;
 
-import simpl.db.Database;
+import simpl.db.api.Database;
 import simpl.db.SimplDb;
 import simpl.db.db.v2.TypeTest;
 

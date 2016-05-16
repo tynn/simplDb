@@ -27,12 +27,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 
-import simpl.db.query.Join;
-import simpl.db.query.JoinType;
-import simpl.db.query.Query;
-import simpl.db.query.QueryDef;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
+import simpl.db.api.Join;
+import simpl.db.api.JoinType;
+import simpl.db.api.Query;
+import simpl.db.api.QueryDef;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
 
 /**
  * {@code SimplQuery} is the base class for all simplDb queries.
@@ -185,6 +185,19 @@ public class SimplQuery {
         return db.query(mTable, mColumns, mFilter.getSelection(filter), mFilter.getSelectionArgs(filter),
                 mFilter.getGroupBy(filter), mFilter.getHaving(filter), mFilter.getOrderBy(filter),
                 mFilter.getLimit(filter));
+    }
+
+    /**
+     * {@code Callback} for notification of a finished asynchronous query.
+     */
+    public interface Callback {
+        /**
+         * @param cursor   returned for {@code queryDef} with applied {@code filter}
+         * @param queryDef executed
+         * @param filter   applied
+         * @param db       queried
+         */
+        void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, Filter filter, SimplDb db);
     }
 
     /**

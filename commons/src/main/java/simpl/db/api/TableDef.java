@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table;
-
-import android.provider.BaseColumns;
-
-import simpl.db.SimplDb;
-import simpl.db.SimplDef;
-import simpl.db.query.QueryDef;
+package simpl.db.api;
 
 /**
  * {@code TableDef} is the base class for all simplDb tables.
@@ -35,11 +29,10 @@ public interface TableDef extends SimplDef {
     interface WithID {
         /**
          * Defines an autoincrement primary key integer column for the table.
-         * @see BaseColumns#_ID
          */
         @Column(type = ColumnType.INTEGER)
         @PrimaryKey(autoincrement = true, sortorder = Sortorder.ASC)
-        String _ID = BaseColumns._ID;
+        String _ID = "_id";
     }
 
     /**
@@ -53,14 +46,4 @@ public interface TableDef extends SimplDef {
         String _TIMESTAMP_LOCALTIME = "datetime(_timestamp, 'localtime')";
     }
 
-    /**
-     * {@code Observer} for changes to a table of the databases.
-     */
-    interface Observer {
-        /**
-         * @param queryDef to execute
-         * @param db       which changed
-         */
-        void onTableChanged(Class<? extends QueryDef> queryDef, SimplDb db);
-    }
 }

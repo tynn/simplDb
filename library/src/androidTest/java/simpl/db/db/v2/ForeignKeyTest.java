@@ -16,14 +16,14 @@
 
 package simpl.db.db.v2;
 
-import simpl.db.table.Column;
-import simpl.db.table.ForeignKey;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithID;
+import simpl.db.api.Column;
+import simpl.db.api.ForeignKey;
+import simpl.db.api.Table;
+import simpl.db.api.TableDef;
+import simpl.db.api.TableDef.WithID;
 
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ForeignKeyAction.CASCADE;
+import static simpl.db.api.ColumnType.INTEGER;
+import static simpl.db.api.ForeignKeyAction.CASCADE;
 
 @Table
 @ForeignKey(columns = ForeignKeyTest.FOREIGN_KEY2, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
