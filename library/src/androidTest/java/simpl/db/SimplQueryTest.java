@@ -31,10 +31,10 @@ import simpl.db.SimplQuery.Filter;
 import simpl.db.query.Join;
 import simpl.db.query.Query;
 import simpl.db.query.QueryDef;
-import simpl.db.table.v10.DatabaseTest;
-import simpl.db.table.v10.JoinTest;
-import simpl.db.table.v10.QueryTest;
-import simpl.db.table.v10.TableTest;
+import simpl.db.db.v10.DatabaseTest;
+import simpl.db.db.v10.JoinTest;
+import simpl.db.db.v10.QueryTest;
+import simpl.db.db.v10.TableTest;
 
 import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;

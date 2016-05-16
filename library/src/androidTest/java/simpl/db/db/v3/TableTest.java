@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v3;
+package simpl.db.db.v3;
 
-import android.content.Context;
+import simpl.db.table.Column;
+import simpl.db.table.ColumnType;
+import simpl.db.table.Table;
+import simpl.db.table.TableDef;
 
-import simpl.db.Database;
-import simpl.db.SimplDb;
-
-@Database(tables = {TableTest.class}, version = 3)
-public class DatabaseTest extends SimplDb {
-    public DatabaseTest(Context context) {
-        super(context);
-    }
+@Table
+public interface TableTest extends TableDef {
+    @Column(type = ColumnType.TEXT)
+    String DATA = "data";
 }

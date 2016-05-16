@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v21;
+package simpl.db.db.v21;
 
 import android.annotation.TargetApi;
 

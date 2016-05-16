@@ -14,30 +14,17 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v2;
+package simpl.db.db.v10;
 
-import simpl.db.table.Check;
+import simpl.db.query.QueryDef;
 import simpl.db.table.Column;
+import simpl.db.table.ColumnType;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
-
-import static simpl.db.table.ColumnType.BLOB;
-import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ColumnType.NUMERIC;
-import static simpl.db.table.ColumnType.TEXT;
+import simpl.db.table.TableDef.WithCurrentTimestamp;
 
 @Table
-@Check(expression = TableTest.INFO + "!=\"test\"")
-public interface TableTest extends TableDef {
-    @Column(type = BLOB)
+public interface TableTest extends QueryDef, TableDef, WithCurrentTimestamp {
+    @Column(type = ColumnType.TEXT)
     String DATA = "data";
-
-    @Column(type = INTEGER)
-    String VALUE = "value";
-
-    @Column(type = TEXT)
-    String INFO = "info";
-
-    @Column(type = NUMERIC)
-    String KEEP = "keep";
 }

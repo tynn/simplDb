@@ -24,8 +24,8 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import simpl.db.table.v1.DatabaseTest;
-import simpl.db.table.v1.TableTest;
+import simpl.db.db.v1.DatabaseTest;
+import simpl.db.db.v1.TableTest;
 
 import static android.database.DatabaseUtils.queryNumEntries;
 import static android.support.test.InstrumentationRegistry.getContext;

@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v10;
+package simpl.db.db.v2;
 
-import simpl.db.query.QueryDef;
 import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
+import simpl.db.table.ForeignKey;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithCurrentTimestamp;
+import simpl.db.table.TableDef.WithID;
+
+import static simpl.db.table.ColumnType.INTEGER;
+import static simpl.db.table.ForeignKeyAction.CASCADE;
 
 @Table
-public interface TableTest extends QueryDef, TableDef, WithCurrentTimestamp {
-    @Column(type = ColumnType.TEXT)
-    String DATA = "data";
+@ForeignKey(columns = ForeignKeyTest.FOREIGN_KEY2, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
+public interface ForeignKeyTest extends TableDef, WithID {
+    @Column(type = INTEGER)
+    @ForeignKey(foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
+    String FOREIGN_KEY1 = "foreign_key1";
+
+    @Column(type = INTEGER)
+    String FOREIGN_KEY2 = "foreign_key2";
 }

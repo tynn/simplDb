@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v10;
+package simpl.db.db.v10;
 
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
-import simpl.db.table.Table;
-import simpl.db.table.TableDef;
-import simpl.db.table.TableDef.WithID;
+import android.content.Context;
 
-@Table
-public interface QueryTest extends TableDef, WithID {
-    @Column(type = ColumnType.TEXT)
-    String KEY = "key";
+import simpl.db.Database;
+import simpl.db.SimplDb;
 
-    @Column(type = ColumnType.TEXT)
-    String VALUE = "value";
-
-    @Column(type = ColumnType.INTEGER)
-    String REF = "ref";
+@Database(tables = {TableTest.class, QueryTest.class, JoinTest.class}, version = 10)
+public class DatabaseTest extends SimplDb {
+    public DatabaseTest(Context context) {
+        super(context);
+    }
 }

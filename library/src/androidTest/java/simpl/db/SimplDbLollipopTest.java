@@ -25,8 +25,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import simpl.db.table.v21.DatabaseTest;
-import simpl.db.table.v21.TableTest;
+import simpl.db.db.v21.DatabaseTest;
+import simpl.db.db.v21.TableTest;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.support.test.InstrumentationRegistry.getContext;

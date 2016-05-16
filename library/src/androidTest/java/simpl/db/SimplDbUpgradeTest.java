@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import simpl.db.SimplDb.Insert;
-import simpl.db.table.v1.TableTest;
-import simpl.db.table.v2.ColumnTest;
+import simpl.db.db.v1.TableTest;
+import simpl.db.db.v2.ColumnTest;
 
 import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;
@@ -33,10 +33,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static simpl.db.SimplDb.getName;
 import static simpl.db.SimplDb.getTables;
-import static simpl.db.table.v1.TableTest.DATA;
-import static simpl.db.table.v1.TableTest.DROP;
-import static simpl.db.table.v1.TableTest.DROP$;
-import static simpl.db.table.v1.TableTest.KEEP;
+import static simpl.db.db.v1.TableTest.DATA;
+import static simpl.db.db.v1.TableTest.DROP;
+import static simpl.db.db.v1.TableTest.DROP$;
+import static simpl.db.db.v1.TableTest.KEEP;
 
 public class SimplDbUpgradeTest {
     private final static String TABLE = getName(TableTest.class);
@@ -153,14 +153,14 @@ public class SimplDbUpgradeTest {
         Context context = getContext();
         switch (version) {
             case 3:
-                mSimpleDb = new simpl.db.table.v3.DatabaseTest(context);
+                mSimpleDb = new simpl.db.db.v3.DatabaseTest(context);
                 break;
             case 2:
-                mSimpleDb = new simpl.db.table.v2.DatabaseTest(context);
+                mSimpleDb = new simpl.db.db.v2.DatabaseTest(context);
                 break;
             case 1:
             default:
-                mSimpleDb = new simpl.db.table.v1.DatabaseTest(context);
+                mSimpleDb = new simpl.db.db.v1.DatabaseTest(context);
         }
     }
 }

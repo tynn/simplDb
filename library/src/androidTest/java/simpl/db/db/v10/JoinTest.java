@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v2;
+package simpl.db.db.v10;
 
 import simpl.db.table.Column;
-import simpl.db.table.ForeignKey;
+import simpl.db.table.Default;
+import simpl.db.table.NotNull;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
 import simpl.db.table.TableDef.WithID;
+import simpl.db.table.Unique;
 
 import static simpl.db.table.ColumnType.INTEGER;
-import static simpl.db.table.ForeignKeyAction.CASCADE;
+import static simpl.db.table.ColumnType.TEXT;
 
 @Table
-@ForeignKey(columns = ForeignKeyTest.FOREIGN_KEY2, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
-public interface ForeignKeyTest extends TableDef, WithID {
-    @Column(type = INTEGER)
-    @ForeignKey(foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
-    String FOREIGN_KEY1 = "foreign_key1";
+public interface JoinTest extends TableDef, WithID {
+    @Column(type = TEXT)
+    @NotNull
+    @Unique
+    String EXTRA = "extra";
 
     @Column(type = INTEGER)
-    String FOREIGN_KEY2 = "foreign_key2";
+    @Default("7")
+    String REF = "ref";
 }

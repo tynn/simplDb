@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v1;
+package simpl.db.db.v2;
 
+import simpl.db.table.Check;
+import simpl.db.table.Column;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
 
-import static simpl.db.SimplDb.quote;
+import static simpl.db.table.ColumnType.BLOB;
+import static simpl.db.table.ColumnType.INTEGER;
+import static simpl.db.table.ColumnType.NUMERIC;
+import static simpl.db.table.ColumnType.TEXT;
 
 @Table
+@Check(expression = TableTest.INFO + "!=\"test\"")
 public interface TableTest extends TableDef {
-    @Column(type = ColumnType.TEXT)
+    @Column(type = BLOB)
     String DATA = "data";
 
-    @Column(type = ColumnType.NUMERIC)
-    String DROP = "drop";
-    String DROP$ = quote(DROP);
+    @Column(type = INTEGER)
+    String VALUE = "value";
 
-    @Column(type = ColumnType.NUMERIC)
+    @Column(type = TEXT)
+    String INFO = "info";
+
+    @Column(type = NUMERIC)
     String KEEP = "keep";
 }

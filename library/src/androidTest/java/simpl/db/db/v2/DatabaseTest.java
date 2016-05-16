@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v1;
+package simpl.db.db.v2;
 
 import android.content.Context;
 
 import simpl.db.Database;
 import simpl.db.SimplDb;
 
-@Database(tables = {TableTest.class}, version = 1)
+@Database(tables = {ColumnTest.class, TableTest.class, TypeTest.class, ForeignKeyTest.class}, version = 2)
 public class DatabaseTest extends SimplDb {
     public DatabaseTest(Context context) {
         super(context);

@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v3;
+package simpl.db.db.v1;
 
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
+import simpl.db.table.Column;
+import simpl.db.table.ColumnType;
+
+import static simpl.db.SimplDb.quote;
 
 @Table
 public interface TableTest extends TableDef {
     @Column(type = ColumnType.TEXT)
     String DATA = "data";
+
+    @Column(type = ColumnType.NUMERIC)
+    String DROP = "drop";
+    String DROP$ = quote(DROP);
+
+    @Column(type = ColumnType.NUMERIC)
+    String KEEP = "keep";
 }

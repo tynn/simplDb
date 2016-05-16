@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v21;
+package simpl.db.db.v3;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 
 import simpl.db.Database;
 import simpl.db.SimplDb;
-import simpl.db.table.v2.TypeTest;
 
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
-
-@TargetApi(LOLLIPOP)
-@Database(tables = {TypeTest.class, TableTest.MI.class, TableTest.OI.class}, version = 21)
+@Database(tables = {TableTest.class}, version = 3)
 public class DatabaseTest extends SimplDb {
     public DatabaseTest(Context context) {
         super(context);

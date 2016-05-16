@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v2;
+package simpl.db.db.v10;
 
+import simpl.db.table.Column;
+import simpl.db.table.ColumnType;
 import simpl.db.table.Table;
 import simpl.db.table.TableDef;
 import simpl.db.table.TableDef.WithID;
-import simpl.db.table.Column;
-import simpl.db.table.ColumnType;
 
 @Table
-public interface TypeTest extends TableDef, WithID {
-    @Column(type = ColumnType.BLOB)
-    String BLOB = "blob";
-
-    @Column(type = ColumnType.INTEGER)
-    String INTEGER = "integer";
-
-    @Column(type = ColumnType.NUMERIC)
-    String NUMERIC = "numeric";
-
-    @Column(type = ColumnType.REAL)
-    String REAL = "real";
+public interface QueryTest extends TableDef, WithID {
+    @Column(type = ColumnType.TEXT)
+    String KEY = "key";
 
     @Column(type = ColumnType.TEXT)
-    String TEXT = "text";
+    String VALUE = "value";
+
+    @Column(type = ColumnType.INTEGER)
+    String REF = "ref";
 }

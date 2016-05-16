@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package simpl.db.table.v10;
+package simpl.db.db.v2;
 
+import simpl.db.table.Check;
+import simpl.db.table.Collate;
 import simpl.db.table.Column;
 import simpl.db.table.Default;
 import simpl.db.table.NotNull;
@@ -24,17 +26,37 @@ import simpl.db.table.TableDef;
 import simpl.db.table.TableDef.WithID;
 import simpl.db.table.Unique;
 
+import static simpl.db.SimplDb.quote;
+import static simpl.db.table.CollationName.NOCASE;
 import static simpl.db.table.ColumnType.INTEGER;
 import static simpl.db.table.ColumnType.TEXT;
+import static simpl.db.table.ConflictClause.REPLACE;
 
 @Table
-public interface JoinTest extends TableDef, WithID {
+public interface ColumnTest extends TableDef, WithID {
+    @Column(type = TEXT)
+    String COLUMN = "column";
+
+    @Column(type = TEXT)
+    @Default(value = "'default'")
+    String DEFAULT = "default";
+
     @Column(type = TEXT)
     @NotNull
-    @Unique
-    String EXTRA = "extra";
+    String NOT_NULL = "not_null";
 
     @Column(type = INTEGER)
-    @Default("7")
-    String REF = "ref";
+    @Check(expression = "\"check\"<3")
+    String CHECK = "check";
+    String CHECK$ = quote(CHECK);
+
+    @Column(type = INTEGER)
+    @Unique(conflictClause = REPLACE)
+    String UNIQUE = "unique";
+    String UNIQUE$ = quote(UNIQUE);
+
+    @Column(type = TEXT)
+    @Collate(collationName = NOCASE)
+    String COLLATE = "collate";
+    String COLLATE$ = quote(COLLATE);
 }
