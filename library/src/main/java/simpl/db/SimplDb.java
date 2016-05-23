@@ -29,6 +29,9 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,10 +44,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
+import simpl.db.api.Check;
+import simpl.db.api.Collate;
+import simpl.db.api.Column;
 import simpl.db.api.Database;
+import simpl.db.api.Default;
+import simpl.db.api.ForeignKey;
+import simpl.db.api.NotNull;
+import simpl.db.api.PrimaryKey;
 import simpl.db.api.QueryDef;
 import simpl.db.api.SimplDef;
+import simpl.db.api.Table;
 import simpl.db.api.TableDef;
+import simpl.db.api.Unique;
+import simpl.db.api.WithoutRowid;
+import simpl.db.spec.DatabaseSpec;
+import simpl.db.spec.SimplSpec;
+import simpl.db.spec.TableSpec;
 
 /**
  * {@code SimplDb} is the base class for all simplDb databases.
@@ -59,8 +75,15 @@ import simpl.db.api.TableDef;
 @SuppressWarnings("unused")
 public abstract class SimplDb implements SimplDef {
     static final String TAG = "simplDb#" + BuildConfig.VERSION_CODE;
+    private static final String MSG_FORMAT = "Column %1$s in %2$s must match " +
+            "'public static final String %1$s = \"%3$s\";'";
 
+    private static final String DATABASE_SPEC = "$$DatabaseSpec";
+    private static final String TABLE_SPEC = "$$TableSpec";
+
+    private static final HashMap<Class<? extends SimplDb>, DatabaseSpec> D = new HashMap<>();
     private static final HashMap<Class<? extends SimplDef>, String> S = new HashMap<>();
+    private static final HashMap<Class<? extends TableDef>, TableSpec> T = new HashMap<>();
 
     private static final Handler uiHandler = new Handler(Looper.getMainLooper());
     private static Handler sQuitter, sWorker;
@@ -97,22 +120,122 @@ public abstract class SimplDb implements SimplDef {
      * @param context used to create the {@link SQLiteOpenHelper} instance
      */
     protected SimplDb(Context context) {
-        Class<? extends SimplDb> databaseDef = getClass();
+        DatabaseSpec spec = loadDatabaseSpec(getClass());
 
-        Database database = databaseDef.getAnnotation(Database.class);
-        if (database == null)
-            throw new SimplError(databaseDef, Database.class);
-
-        name = getName(databaseDef);
-        version = database.version();
+        name = getName(spec.name);
+        version = spec.annotation.version();
         Log.v(TAG, name + ':' + version);
 
-        mTableDefs = Collections.unmodifiableList(Arrays.asList(database.tables()));
+        mTableDefs = Collections.unmodifiableList(Arrays.asList(spec.annotation.tables()));
 
         mContext = context.getApplicationContext();
         mSQLiteOpenHelper = onCreateSQLiteOpenHelper(mContext);
         if (mSQLiteOpenHelper == null)
             throw new NullPointerException("onCreateSQLiteOpenHelper() must not return null");
+    }
+
+    private static synchronized DatabaseSpec loadDatabaseSpec(Class<? extends SimplDb> databaseDef) {
+        DatabaseSpec spec = D.get(databaseDef);
+        if (spec != null)
+            return spec;
+
+        String databaseSpecName = databaseDef.getName() + DATABASE_SPEC;
+        try {
+            spec = (DatabaseSpec) Class.forName(databaseSpecName).newInstance();
+            if (D.put(databaseDef, spec) == null) {
+                for (TableSpec tableSpec : spec.tableSpecs)
+                    if (T.put(tableSpec.simplDef, tableSpec) == null)
+                        S.put(tableSpec.simplDef, tableSpec.name);
+                S.put(databaseDef, spec.name);
+            }
+            return spec;
+        } catch (ClassCastException e) {
+            throw new SimplError(databaseSpecName + " must extend " + DatabaseSpec.class);
+        } catch (ClassNotFoundException e) {
+            Log.i(TAG, databaseSpecName + " not found");
+        } catch (Exception e) {
+            Log.e(TAG, "error", e);
+        }
+
+        Database database = databaseDef.getAnnotation(Database.class);
+        if (database == null)
+            throw new SimplError(databaseDef, Database.class);
+
+        spec = new DatabaseSpec(getSimpleName(databaseDef), database, databaseDef);
+        D.put(databaseDef, spec);
+        return spec;
+    }
+
+    static synchronized TableSpec loadTableSpec(Class<? extends TableDef> tableDef) {
+        TableSpec spec = T.get(tableDef);
+        if (spec != null)
+            return spec;
+
+        String tableSpecName = tableDef.getName() + TABLE_SPEC;
+        try {
+            spec = (TableSpec) Class.forName(tableSpecName).newInstance();
+            if (T.put(tableDef, spec) == null)
+                S.put(tableDef, spec.name);
+            return spec;
+        } catch (ClassCastException e) {
+            throw new SimplError(tableSpecName + " must extend " + TableSpec.class);
+        } catch (ClassNotFoundException e) {
+            Log.i(TAG, tableSpecName + " not found");
+        } catch (Exception e) {
+            Log.e(TAG, "error", e);
+        }
+
+        Table table = tableDef.getAnnotation(Table.class);
+        if (table == null)
+            throw new SimplError(tableDef, Table.class);
+
+        spec = new TableSpec(getName(tableDef), table, tableDef);
+        loadConstraints(spec);
+        for (Field field : tableDef.getFields())
+            loadColumnSpec(field, spec);
+        T.put(tableDef, spec);
+        return spec;
+    }
+
+    private static void loadConstraints(TableSpec tableSpec) {
+        Class<? extends TableDef> tableDef = tableSpec.simplDef;
+        HashSet<Annotation> constraints = tableSpec.constraints;
+        constraints.add(tableDef.getAnnotation(Check.class));
+        constraints.add(tableDef.getAnnotation(ForeignKey.class));
+        if (WithoutRowid.SUPPORTED)
+            constraints.add(tableDef.getAnnotation(WithoutRowid.class));
+        constraints.remove(null);
+    }
+
+    private static boolean loadColumnSpec(Field field, TableSpec tableSpec) {
+        Column column = field.getAnnotation(Column.class);
+        if (column == null)
+            return false;
+
+        String fieldName = field.getName();
+        String name = getName(fieldName);
+        if (isPublicStaticFinalString(field)) {
+            try {
+                if (name.equals(field.get(null))) {
+                    HashSet<Annotation> constraints = new HashSet<>();
+                    constraints.add(field.getAnnotation(Column.class));
+                    constraints.add(field.getAnnotation(PrimaryKey.class));
+                    constraints.add(field.getAnnotation(NotNull.class));
+                    constraints.add(field.getAnnotation(Unique.class));
+                    constraints.add(field.getAnnotation(Check.class));
+                    constraints.add(field.getAnnotation(Default.class));
+                    constraints.add(field.getAnnotation(Collate.class));
+                    constraints.add(field.getAnnotation(ForeignKey.class));
+                    constraints.remove(null);
+                    tableSpec.columnSpecs.put(name, constraints);
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.d(SimplDb.TAG, "assert", e);
+            }
+        }
+
+        throw new SimplError(String.format(Locale.UK, MSG_FORMAT, fieldName, tableSpec.name, name));
     }
 
 	/* SQLiteOpenHelper wrapper */
@@ -788,7 +911,7 @@ public abstract class SimplDb implements SimplDef {
          * @see #onUpgrade(SQLiteDatabase, int, int)
          */
         protected void onCreateTable(SQLiteDatabase db, Class<? extends TableDef> tableDef) {
-            db.execSQL(mTable.build(tableDef, false));
+            db.execSQL(mTable.build(loadTableSpec(tableDef), false));
         }
 
         /**
@@ -800,7 +923,7 @@ public abstract class SimplDb implements SimplDef {
          * @see #onUpgrade(SQLiteDatabase, int, int)
          */
         protected void onUpgradeTable(SQLiteDatabase db, Class<? extends TableDef> tableDef) {
-            db.execSQL(mTable.build(tableDef, true));
+            db.execSQL(mTable.build(loadTableSpec(tableDef), true));
 
             String table = mTable.getName();
             HashSet<String> columns = new HashSet<>(getColumns(db, table));
@@ -878,22 +1001,10 @@ public abstract class SimplDb implements SimplDef {
      *
      * @param name string
      * @return the internal name for {@code name}
+     * @see SimplSpec#getName(String)
      */
     public static String getName(String name) {
-        StringBuilder sb = new StringBuilder(name.length() + 10);
-        boolean capsToUnderscore = false;
-        for (char c : name.toCharArray())
-            if (Character.isUpperCase(c)) {
-                if (capsToUnderscore) {
-                    capsToUnderscore = false;
-                    sb.append('_');
-                }
-                sb.append(Character.toLowerCase(c));
-            } else {
-                capsToUnderscore = Character.isLowerCase(c) || Character.isDigit(c);
-                sb.append(capsToUnderscore ? c : '_');
-            }
-        return sb.toString();
+        return SimplSpec.getName(name);
     }
 
     /**
@@ -912,5 +1023,11 @@ public abstract class SimplDb implements SimplDef {
         if (simpleName == null)
             S.put(simplDef, simpleName = simplDef.getSimpleName());
         return simpleName;
+    }
+
+    private static boolean isPublicStaticFinalString(Field field) {
+        int modifiers = field.getModifiers();
+        return Modifier.isPublic(modifiers) && Modifier.isFinal(modifiers) &&
+                Modifier.isStatic(modifiers) && field.getType() == String.class;
     }
 }

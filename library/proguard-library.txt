@@ -6,3 +6,5 @@
     @simpl.db.api.Column public static final java.lang.String *;
 }
 -keepclassmembers class simpl.db.** { public final *; }
+-keep class * extends simpl.db.spec.DatabaseSpec
+-keep class * extends simpl.db.spec.TableSpec

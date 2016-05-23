@@ -16,13 +16,10 @@
 
 package simpl.db;
 
-import android.util.Log;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import simpl.db.api.Check;
@@ -36,24 +33,19 @@ import simpl.db.api.NotNull;
 import simpl.db.api.PrimaryKey;
 import simpl.db.api.Sortorder;
 import simpl.db.api.Table;
-import simpl.db.api.TableDef;
 import simpl.db.api.Unique;
 import simpl.db.api.WithoutRowid;
+import simpl.db.spec.TableSpec;
 
 final class TableSql {
-    private static final String MSG_FORMAT = "Column %1$s in %2$s must match " +
-            "'public static final String %1$s = \"%3$s\";'";
-
     private final StringBuilder mSql = new StringBuilder();
     private final HashSet<String> mColumns = new HashSet<>();
 
     private String mName;
 
-    synchronized String build(Class<? extends TableDef> tableDef, boolean tmp) {
-        Table table = tableDef.getAnnotation(Table.class);
-        if (table == null)
-            throw new SimplError(tableDef, Table.class);
-        mName = SimplDb.getName(tableDef);
+    synchronized String build(TableSpec tableSpec, boolean tmp) {
+        Table table = tableSpec.annotation;
+        mName = SimplDb.getName(tableSpec.name);
 
         mSql.setLength(0);
         mColumns.clear();
@@ -68,103 +60,128 @@ final class TableSql {
             mSql.append('_');
         mSql.append(mName).append(" (");
 
-        boolean delimiter = false;
-        for (Field field : tableDef.getFields())
-            delimiter |= addColumn(field, delimiter ? ", " : "");
+        boolean separate = false;
+        for (Map.Entry<String, HashSet<? extends Annotation>> e : tableSpec.columnSpecs.entrySet())
+            separate |= addColumn(e.getKey(), e.getValue(), separate ? ", " : "");
 
-        handleCheck(tableDef);
-        handleForeignKey(tableDef);
+        boolean withoutRowId = addConstraints(tableSpec.constraints);
 
         mSql.append(")");
-        if (WithoutRowid.SUPPORTED && tableDef.getAnnotation(WithoutRowid.class) != null)
+        if (withoutRowId)
             mSql.append(" WITHOUT ROWID");
 
         return mSql.toString();
     }
 
-    private static boolean isPublicStaticFinalString(Field field) {
-        int modifiers = field.getModifiers();
-        return Modifier.isPublic(modifiers) && Modifier.isFinal(modifiers) &&
-                Modifier.isStatic(modifiers) && field.getType() == String.class;
-    }
+    private boolean addColumn(String name, HashSet<? extends Annotation> constraints, String delim) {
+        Column column = null;
+        PrimaryKey primaryKey = null;
+        NotNull notNull = null;
+        Unique unique = null;
+        Check check = null;
+        Default defaultValue = null;
+        Collate collate = null;
+        ForeignKey foreignKey = null;
 
-    private boolean addColumn(Field field, String delimiter) {
-        Column column = field.getAnnotation(Column.class);
-        if (column == null)
-            return false;
-
-        if (isPublicStaticFinalString(field)) {
-            String name = SimplDb.getName(field.getName());
-
-            try {
-                if (name.equals(field.get(null))) {
-                    mColumns.add(name);
-                    mSql.append(delimiter);
-                    mSql.append('"').append(name).append('"');
-                    mSql.append(' ').append(column.type());
-
-                    handlePrimaryKey(field);
-                    handleNotNull(field);
-                    handleUnique(field);
-                    handleCheck(field);
-                    handleDefault(field);
-                    handleCollate(field);
-                    handleForeignKey(field);
-
-                    return true;
-                }
-            } catch (Exception e) {
-                Log.d(SimplDb.TAG, "assert", e);
-            }
+        for (Annotation ann : constraints) {
+            if (ann instanceof Column)
+                column = (Column) ann;
+            else if (ann instanceof PrimaryKey)
+                primaryKey = (PrimaryKey) ann;
+            else if (ann instanceof NotNull)
+                notNull = (NotNull) ann;
+            else if (ann instanceof Unique)
+                unique = (Unique) ann;
+            else if (ann instanceof Check)
+                check = (Check) ann;
+            else if (ann instanceof Default)
+                defaultValue = (Default) ann;
+            else if (ann instanceof Collate)
+                collate = (Collate) ann;
+            else if (ann instanceof ForeignKey)
+                foreignKey = (ForeignKey) ann;
         }
 
-        throw new SimplError(msg(field));
+        mColumns.add(name);
+        mSql.append(delim);
+        mSql.append('"').append(name).append('"');
+        mSql.append(' ').append(column.type());
+
+        if (primaryKey != null)
+            handlePrimaryKey(primaryKey);
+        if (notNull != null)
+            handleNotNull(notNull);
+        if (unique != null)
+            handleUnique(unique);
+        if (check != null)
+            handleCheck(check);
+        if (defaultValue != null)
+            handleDefault(defaultValue);
+        if (collate != null)
+            handleCollate(collate);
+        if (foreignKey != null)
+            handleForeignKey(foreignKey);
+
+        return true;
     }
 
-    private static String msg(Field field) {
-        String name = field.getName();
-        return String.format(Locale.UK, MSG_FORMAT,
-                name, field.getDeclaringClass().getSimpleName(), SimplDb.getName(name));
-    }
+    private boolean addConstraints(HashSet<? extends Annotation> constraints) {
+        Check check = null;
+        ForeignKey foreignKey = null;
+        WithoutRowid withoutRowid = null;
 
-    private void handlePrimaryKey(Field field) {
-        PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
-        if (primaryKey != null) {
-            mSql.append(" PRIMARY KEY");
-
-            if (primaryKey.sortorder() != Sortorder.DEFAULT)
-                mSql.append(' ').append(primaryKey.sortorder());
-
-            if (primaryKey.conflictClause() != ConflictClause.DEFAULT)
-                mSql.append(" ON CONFLICT ").append(primaryKey.conflictClause());
-
-            if (primaryKey.autoincrement())
-                mSql.append(" AUTOINCREMENT");
+        for (Annotation ann : constraints) {
+            if (ann instanceof Check)
+                check = (Check) ann;
+            else if (ann instanceof ForeignKey)
+                foreignKey = (ForeignKey) ann;
+            else if (ann instanceof WithoutRowid)
+                withoutRowid = (WithoutRowid) ann;
         }
-    }
 
-    private void handleUnique(Field field) {
-        Unique unique = field.getAnnotation(Unique.class);
-        if (unique != null) {
-            mSql.append(" UNIQUE");
-
-            if (unique.conflictClause() != ConflictClause.DEFAULT)
-                mSql.append(" ON CONFLICT ").append(unique.conflictClause());
+        if (check != null) {
+            mSql.append(',');
+            handleCheck(check);
         }
-    }
 
-    private void handleNotNull(Field field) {
-        NotNull notNull = field.getAnnotation(NotNull.class);
-        if (notNull != null) {
-            mSql.append(" NOT NULL");
-
-            if (notNull.conflictClause() != ConflictClause.DEFAULT)
-                mSql.append(" ON CONFLICT ").append(notNull.conflictClause());
+        if (foreignKey != null) {
+            mSql.append(", FOREIGN KEY");
+            if (!handleColumns(foreignKey.columns()))
+                throw new SimplError(ForeignKey.class);
+            handleForeignKey(foreignKey);
         }
+
+        return withoutRowid != null;
     }
 
-    private void handleDefault(Field field) {
-        Default defaultValue = field.getAnnotation(Default.class);
+    private void handlePrimaryKey(PrimaryKey primaryKey) {
+        mSql.append(" PRIMARY KEY");
+
+        if (primaryKey.sortorder() != Sortorder.DEFAULT)
+            mSql.append(' ').append(primaryKey.sortorder());
+
+        if (primaryKey.conflictClause() != ConflictClause.DEFAULT)
+            mSql.append(" ON CONFLICT ").append(primaryKey.conflictClause());
+
+        if (primaryKey.autoincrement())
+            mSql.append(" AUTOINCREMENT");
+    }
+
+    private void handleUnique(Unique unique) {
+        mSql.append(" UNIQUE");
+
+        if (unique.conflictClause() != ConflictClause.DEFAULT)
+            mSql.append(" ON CONFLICT ").append(unique.conflictClause());
+    }
+
+    private void handleNotNull(NotNull notNull) {
+        mSql.append(" NOT NULL");
+
+        if (notNull.conflictClause() != ConflictClause.DEFAULT)
+            mSql.append(" ON CONFLICT ").append(notNull.conflictClause());
+    }
+
+    private void handleDefault(Default defaultValue) {
         if (defaultValue != null) {
             mSql.append(" DEFAULT ");
 
@@ -175,44 +192,12 @@ final class TableSql {
         }
     }
 
-    private void handleCollate(Field field) {
-        Collate collation = field.getAnnotation(Collate.class);
-        if (collation != null)
-            mSql.append(" COLLATE ").append(collation.collationName());
-    }
-
-    private void handleCheck(Class<? extends TableDef> tableDef) {
-        Check check = tableDef.getAnnotation(Check.class);
-        if (check != null) {
-            mSql.append(',');
-            handleCheck(check);
-        }
-    }
-
-    private void handleCheck(Field field) {
-        Check check = field.getAnnotation(Check.class);
-        if (check != null)
-            handleCheck(check);
+    private void handleCollate(Collate collation) {
+        mSql.append(" COLLATE ").append(collation.collationName());
     }
 
     private void handleCheck(Check check) {
         mSql.append(" CHECK (").append(check.expression()).append(')');
-    }
-
-    private void handleForeignKey(Class<? extends TableDef> tableDef) {
-        ForeignKey foreignKey = tableDef.getAnnotation(ForeignKey.class);
-        if (foreignKey != null) {
-            mSql.append(", FOREIGN KEY");
-            if (!handleColumns(foreignKey.columns()))
-                throw new SimplError(ForeignKey.class);
-            handleForeignKey(foreignKey);
-        }
-    }
-
-    private void handleForeignKey(Field field) {
-        ForeignKey foreignKey = field.getAnnotation(ForeignKey.class);
-        if (foreignKey != null)
-            handleForeignKey(foreignKey);
     }
 
     private void handleForeignKey(ForeignKey key) {

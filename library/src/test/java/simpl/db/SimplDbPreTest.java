@@ -18,11 +18,27 @@ package simpl.db;
 
 import org.junit.Test;
 
+import java.util.Collections;
+
+import simpl.db.api.Column;
+import simpl.db.api.Table;
 import simpl.db.db.TestTable;
+import simpl.db.spec.TableSpec;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class SimplDbPreTest {
+
+    @Test
+    public void loadTableSpec() throws Exception {
+        TableSpec spec = SimplDb.loadTableSpec(TestTable.class);
+        assertEquals(TestTable.class, spec.simplDef);
+        assertEquals(TestTable.NAME, spec.name);
+        assertEquals(TestTable.class.getAnnotation(Table.class), spec.annotation);
+        assertEquals(Collections.singleton(TestTable.TEST), spec.columnSpecs.keySet());
+        assertTrue(spec.columnSpecs.get(TestTable.TEST).iterator().next() instanceof Column);
+    }
 
     @Test
     public void getName() throws Exception {
@@ -44,5 +60,20 @@ public class SimplDbPreTest {
         assertEquals(expected, SimplDb.quote('"' + value));
         assertEquals(expected, SimplDb.quote(value + '"'));
         assertEquals(expected, SimplDb.quote(expected));
+    }
+
+    @Test
+    public void validTables() throws Exception {
+        SimplDb.loadTableSpec(TestTable.I.class);
+    }
+
+    @Test(expected = SimplError.class)
+    public void invalidTable() throws Exception {
+        SimplDb.loadTableSpec(TestTable.I1.class);
+    }
+
+    @Test(expected = SimplError.class)
+    public void invalidColumn() throws Exception {
+        SimplDb.loadTableSpec(TestTable.I2.class);
     }
 }
