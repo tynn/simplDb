@@ -54,6 +54,7 @@ import simpl.db.table.TableDef;
  * {@code SimplDb} itself is not synchronized and should better be used as a singleton.
  * </p>
  */
+@SuppressWarnings("unused")
 public abstract class SimplDb implements SimplDef {
     static final String TAG = "simplDb#" + BuildConfig.VERSION_CODE;
 
@@ -814,6 +815,7 @@ public abstract class SimplDb implements SimplDef {
 
 	/* Local utilities */
 
+    @SuppressWarnings("TryFinallyCanBeTryWithResources")
     static Collection<String> getTables(SQLiteDatabase db) {
         String[] columns = {"name"};
         Cursor cursor = db.query("sqlite_master", columns, "type='table'", null, null, null, null);
@@ -827,6 +829,7 @@ public abstract class SimplDb implements SimplDef {
         }
     }
 
+    @SuppressWarnings("TryFinallyCanBeTryWithResources")
     static Collection<String> getColumns(SQLiteDatabase db, String table) {
         Cursor cursor = db.query(table, null, null, null, null, null, null, "0");
         try {

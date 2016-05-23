@@ -86,6 +86,7 @@ public class SimplQuery {
      * @param tables  this query should observe
      * @see SQLiteDatabase#query(String, String[], String, String[], String, String, String, String)
      */
+    @SuppressWarnings("unchecked")
     protected SimplQuery(String table, String[] columns, Filter filter, Class<? extends TableDef>... tables) {
         if (table == null)
             throw new NullPointerException("table must not be null");
