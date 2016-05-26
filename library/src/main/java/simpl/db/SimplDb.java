@@ -58,6 +58,8 @@ import simpl.db.table.TableDef;
 public abstract class SimplDb implements SimplDef {
     static final String TAG = "simplDb#" + BuildConfig.VERSION_CODE;
 
+    private static final HashMap<Class<? extends SimplDef>, String> S = new HashMap<>();
+
     private static final Handler uiHandler = new Handler(Looper.getMainLooper());
     private static Handler sQuitter, sWorker;
     private static final Runnable QUITTER = new Runnable() {
@@ -884,11 +886,18 @@ public abstract class SimplDb implements SimplDef {
     /**
      * Creates the internal name for a {@link SimplDef} subclass.
      *
-     * @param simpleDef implemented simplDb type
-     * @return the internal name of the type defined by {@code simpleDef}
+     * @param simplDef implemented simplDb type
+     * @return the internal name of the type defined by {@code simplDef}
      * @see #getName(String)
      */
-    public static String getName(Class<? extends SimplDef> simpleDef) {
-        return getName(simpleDef.getSimpleName());
+    public static String getName(Class<? extends SimplDef> simplDef) {
+        return getName(getSimpleName(simplDef));
+    }
+
+    private static String getSimpleName(Class<? extends SimplDef> simplDef) {
+        String simpleName = S.get(simplDef);
+        if (simpleName == null)
+            S.put(simplDef, simpleName = simplDef.getSimpleName());
+        return simpleName;
     }
 }
