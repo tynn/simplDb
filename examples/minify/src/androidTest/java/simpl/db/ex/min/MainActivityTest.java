@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.min;
+package simpl.db.ex.min;
 
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.EspressoException;
@@ -35,7 +35,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static simpl.db.min.ExamplDb.getName;
+import static simpl.db.ex.min.ExamplDb.getName;
 
 public class MainActivityTest {
     private IdlingResource mIdlingResource;

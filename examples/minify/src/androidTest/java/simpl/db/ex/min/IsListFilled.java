@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package simpl.db.min;
+package simpl.db.ex.min;
 
 import android.app.Activity;
 import android.support.test.espresso.IdlingResource;
 import android.view.View;
 import android.widget.ListView;
 
-import static simpl.db.min.MainActivity.LIST_VIEW_ID;
+import static simpl.db.ex.min.MainActivity.LIST_VIEW_ID;
 
 class IsListFilled implements IdlingResource {
     private final Activity mActivity;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.min;
+package simpl.db.ex.min;
 
 import android.content.Context;
 
