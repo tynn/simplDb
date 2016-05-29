@@ -90,9 +90,8 @@ A default constructor must be provided for this implementation.
 
 Get the latest release from the [JitPack repository][2]
 
-    compile 'com.github.tynn:simplDb:0.3@aar'
-
-or download the [latest .jar file][4] directly.
+    compile 'com.github.tynn.simpldb:library:0.4@aar'
+    apt 'com.github.tynn.simpldb:compiler:0.4'
 
 ### Proguard
 
@@ -106,6 +105,8 @@ The following Proguard rules should be applied when using the .jar file.
         @simpl.db.api.Column public static final java.lang.String *;
     }
     -keepclassmembers class simpl.db.** { public final *; }
+    -keep class * extends simpl.db.DatabaseSpec
+    -keep class * extends simpl.db.TableSpec
 
 
 ## License
@@ -125,7 +126,6 @@ The following Proguard rules should be applied when using the .jar file.
     limitations under the License.
 
 
- [1]: https://jitpack.io/v/tynn/simplDb.svg
- [2]: https://jitpack.io/#tynn/simplDb
+ [1]: https://jitpack.io/v/tynn/simpldb.svg
+ [2]: https://jitpack.io/#tynn/simpldb
  [3]: https://www.sqlite.org/lang_altertable.html#otheralter
- [4]: https://jitpack.io/com/github/tynn/simplDb/0.3/simplDb-0.3.jar
