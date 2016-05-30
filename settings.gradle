@@ -1,5 +1,6 @@
 include ':library'
 include ':compiler'
 include ':commons'
+include ':internal'
 include ':external'
 include ':examples:minify'

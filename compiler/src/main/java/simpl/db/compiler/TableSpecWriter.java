@@ -31,7 +31,7 @@ import javax.lang.model.type.TypeMirror;
 import simpl.db.api.Column;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
-import simpl.db.spec.SimplSpec;
+import simpl.db.internal.SimplName;
 import simpl.db.spec.TableSpec;
 
 class TableSpecWriter extends SimplSpecWriter {
@@ -70,7 +70,7 @@ class TableSpecWriter extends SimplSpecWriter {
         collectColumns(type, columns);
         HashSet<String> columnNames = new HashSet<>();
         for (VariableElement field : columns) {
-            String name = SimplSpec.getName(field.getSimpleName().toString());
+            String name = SimplName.from(field.getSimpleName().toString());
             if (!columnNames.add(name))
                 error(field + " provides a duplicated column " + name, field, null);
 
@@ -97,7 +97,7 @@ class TableSpecWriter extends SimplSpecWriter {
         AnnotationMirror column = getAnnotation(field, Column.class);
         if (column == null)
             return false;
-        String name = SimplSpec.getName(field.getSimpleName().toString());
+        String name = SimplName.from(field.getSimpleName().toString());
         if (name.equals(field.getConstantValue().toString()))
             return true;
         error(field + " must have a constant value of \"" + name + "\"", field, column);

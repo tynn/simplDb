@@ -41,28 +41,4 @@ public abstract class SimplSpec<A extends Annotation, D extends SimplDef> {
         this.annotation = annotation;
         this.simplDef = simplDef;
     }
-
-    /**
-     * Creates an internal name for any given string.
-     * This is a snake case representation of the string itself.
-     *
-     * @param name string
-     * @return the internal name for {@code name}
-     */
-    public static String getName(String name) {
-        StringBuilder sb = new StringBuilder(name.length() + 10);
-        boolean capsToUnderscore = false;
-        for (char c : name.toCharArray())
-            if (Character.isUpperCase(c)) {
-                if (capsToUnderscore) {
-                    capsToUnderscore = false;
-                    sb.append('_');
-                }
-                sb.append(Character.toLowerCase(c));
-            } else {
-                capsToUnderscore = Character.isLowerCase(c) || Character.isDigit(c);
-                sb.append(capsToUnderscore ? c : '_');
-            }
-        return sb.toString();
-    }
 }

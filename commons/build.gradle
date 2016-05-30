@@ -3,4 +3,5 @@ apply from: "$rootProject.projectDir/maven.gradle"
 
 dependencies {
     provided project(':external')
+    include project(':internal')
 }

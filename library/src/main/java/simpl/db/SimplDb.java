@@ -58,8 +58,8 @@ import simpl.db.api.Table;
 import simpl.db.api.TableDef;
 import simpl.db.api.Unique;
 import simpl.db.api.WithoutRowid;
+import simpl.db.internal.SimplName;
 import simpl.db.spec.DatabaseSpec;
-import simpl.db.spec.SimplSpec;
 import simpl.db.spec.TableSpec;
 
 /**
@@ -986,13 +986,7 @@ public abstract class SimplDb implements SimplDef {
      * @return the quoted string
      */
     public static String quote(String value) {
-        StringBuilder sb = new StringBuilder(value.length() + 2);
-        if (value.charAt(0) != '"')
-            sb.append('"');
-        sb.append(value);
-        if (value.charAt(value.length() - 1) != '"')
-            sb.append('"');
-        return sb.toString();
+        return SimplName.quote(value);
     }
 
     /**
@@ -1001,10 +995,9 @@ public abstract class SimplDb implements SimplDef {
      *
      * @param name string
      * @return the internal name for {@code name}
-     * @see SimplSpec#getName(String)
      */
     public static String getName(String name) {
-        return SimplSpec.getName(name);
+        return SimplName.from(name);
     }
 
     /**
