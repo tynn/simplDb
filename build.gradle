@@ -17,6 +17,21 @@ allprojects {
     }
 }
 
+subprojects {
+    configurations {
+        include
+        provided.extendsFrom include
+        compile.extendsFrom provided
+
+        include.dependencies.all { dep ->
+            configurations.default.exclude group: dep.group, module: dep.name
+        }
+        provided.dependencies.all { dep ->
+            configurations.default.exclude group: dep.group, module: dep.name
+        }
+    }
+}
+
 ext.group = "com.github.tynn.simpldb"
 
 task clean(type: Delete) {

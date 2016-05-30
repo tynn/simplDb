@@ -3,9 +3,13 @@ apply plugin: 'java'
 targetCompatibility = JavaVersion.VERSION_1_7
 sourceCompatibility = JavaVersion.VERSION_1_7
 
+jar.from {
+    configurations.include.collect { zipTree(it) }
+}
+
 dependencies {
+    include project(':external')
     compile project(':commons')
-    compile project(':external')
     testCompile 'junit:junit:4.12'
 }
 
