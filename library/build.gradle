@@ -27,6 +27,28 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.4.1'
 }
 
+// android lint.jar configuration
+
+configurations {
+    lintChecks
+}
+
+dependencies {
+    lintChecks project(path: ':linter', configuration: 'lintChecks')
+}
+
+task copyLinterJar(type: Copy) {
+    from(configurations.lintChecks) {
+        rename { 'lint.jar' }
+    }
+    into "$project.buildDir/intermediates/lint/"
+}
+
+project.afterEvaluate {
+    def compileLintTask = project.tasks.find { it.name == 'compileLint' }
+    compileLintTask.dependsOn(copyLinterJar)
+}
+
 // android maven exports
 apply plugin: 'com.github.dcendents.android-maven'
 

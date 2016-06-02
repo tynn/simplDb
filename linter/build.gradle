@@ -1,0 +1,14 @@
+apply from: "$rootProject.projectDir/java.gradle"
+
+configurations {
+    lintChecks
+}
+
+jar.manifest.attributes('Lint-Registry': 'simpl.db.lint.SimplLintRegistry')
+
+dependencies {
+    compile 'com.android.tools.lint:lint-api:25.1.0'
+    testCompile 'junit:junit:4.12'
+    lintChecks files(jar)
+    include project(':internal')
+}
