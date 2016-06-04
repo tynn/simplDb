@@ -200,6 +200,8 @@ public abstract class SimplDb implements SimplDef {
     private static void loadConstraints(TableSpec tableSpec) {
         Class<? extends TableDef> tableDef = tableSpec.simplDef;
         HashSet<Annotation> constraints = tableSpec.constraints;
+        constraints.add(tableDef.getAnnotation(PrimaryKey.class));
+        constraints.add(tableDef.getAnnotation(Unique.class));
         constraints.add(tableDef.getAnnotation(Check.class));
         constraints.add(tableDef.getAnnotation(ForeignKey.class));
         if (WithoutRowid.SUPPORTED)

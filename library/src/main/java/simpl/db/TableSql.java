@@ -126,17 +126,37 @@ final class TableSql {
     }
 
     private boolean addConstraints(HashSet<? extends Annotation> constraints) {
+        PrimaryKey primaryKey = null;
+        Unique unique = null;
         Check check = null;
         ForeignKey foreignKey = null;
         WithoutRowid withoutRowid = null;
 
         for (Annotation ann : constraints) {
-            if (ann instanceof Check)
+            if (ann instanceof PrimaryKey)
+                primaryKey = (PrimaryKey) ann;
+            else if (ann instanceof Unique)
+                unique = (Unique) ann;
+            else if (ann instanceof Check)
                 check = (Check) ann;
             else if (ann instanceof ForeignKey)
                 foreignKey = (ForeignKey) ann;
             else if (ann instanceof WithoutRowid)
                 withoutRowid = (WithoutRowid) ann;
+        }
+
+        if (primaryKey != null) {
+            mSql.append(", PRIMARY KEY ");
+            if (!handleColumns(primaryKey.columns()))
+                throw new SimplError(PrimaryKey.class);
+            handleConflictClause(primaryKey.conflictClause());
+        }
+
+        if (unique != null) {
+            mSql.append(", UNIQUE ");
+            if (!handleColumns(unique.columns()))
+                throw new SimplError(Unique.class);
+            handleConflictClause(unique.conflictClause());
         }
 
         if (check != null) {
@@ -160,8 +180,7 @@ final class TableSql {
         if (primaryKey.sortorder() != Sortorder.DEFAULT)
             mSql.append(' ').append(primaryKey.sortorder());
 
-        if (primaryKey.conflictClause() != ConflictClause.DEFAULT)
-            mSql.append(" ON CONFLICT ").append(primaryKey.conflictClause());
+        handleConflictClause(primaryKey.conflictClause());
 
         if (primaryKey.autoincrement())
             mSql.append(" AUTOINCREMENT");
@@ -169,16 +188,17 @@ final class TableSql {
 
     private void handleUnique(Unique unique) {
         mSql.append(" UNIQUE");
-
-        if (unique.conflictClause() != ConflictClause.DEFAULT)
-            mSql.append(" ON CONFLICT ").append(unique.conflictClause());
+        handleConflictClause(unique.conflictClause());
     }
 
     private void handleNotNull(NotNull notNull) {
         mSql.append(" NOT NULL");
+        handleConflictClause(notNull.conflictClause());
+    }
 
-        if (notNull.conflictClause() != ConflictClause.DEFAULT)
-            mSql.append(" ON CONFLICT ").append(notNull.conflictClause());
+    private void handleConflictClause(ConflictClause conflictClause) {
+        if (conflictClause != ConflictClause.DEFAULT)
+            mSql.append(" ON CONFLICT ").append(conflictClause);
     }
 
     private void handleDefault(Default defaultValue) {

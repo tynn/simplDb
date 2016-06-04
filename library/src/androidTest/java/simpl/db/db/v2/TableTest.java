@@ -18,8 +18,10 @@ package simpl.db.db.v2;
 
 import simpl.db.api.Check;
 import simpl.db.api.Column;
+import simpl.db.api.PrimaryKey;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
+import simpl.db.api.Unique;
 
 import static simpl.db.api.ColumnType.BLOB;
 import static simpl.db.api.ColumnType.INTEGER;
@@ -27,10 +29,15 @@ import static simpl.db.api.ColumnType.NUMERIC;
 import static simpl.db.api.ColumnType.TEXT;
 
 @Table
+@PrimaryKey(columns = TableTest.KEY)
+@Unique(columns = TableTest.VALUE)
 @Check(expression = TableTest.INFO + "!=\"test\"")
 public interface TableTest extends TableDef {
     @Column(type = BLOB)
     String DATA = "data";
+
+    @Column(type = INTEGER)
+    String KEY = "key";
 
     @Column(type = INTEGER)
     String VALUE = "value";

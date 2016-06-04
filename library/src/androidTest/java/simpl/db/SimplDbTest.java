@@ -57,6 +57,7 @@ import static simpl.db.db.v2.ForeignKeyTest.FOREIGN_KEY2;
 import static simpl.db.db.v2.TableTest.DATA;
 import static simpl.db.db.v2.TableTest.INFO;
 import static simpl.db.db.v2.TableTest.KEEP;
+import static simpl.db.db.v2.TableTest.KEY;
 import static simpl.db.db.v2.TableTest.VALUE;
 import static simpl.db.db.v2.TypeTest.BLOB;
 import static simpl.db.db.v2.TypeTest.INTEGER;
@@ -229,6 +230,46 @@ public class SimplDbTest {
     }
 
     @Test
+    public void tablePrimaryKey() throws Exception {
+        mTableInsert.contentValues.put(KEY, 2);
+        mTableInsert.contentValues.put(INFO, "first");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        mCursor.close();
+        mTableInsert.contentValues.put(INFO, "second");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        try {
+            assertEquals(1, mCursor.getCount());
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(2, mCursor.getInt(mCursor.getColumnIndex(KEY)));
+            assertEquals("first", mCursor.getString(mCursor.getColumnIndex(INFO)));
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
+    public void tableUnique() throws Exception {
+        mTableInsert.contentValues.put(VALUE, 2);
+        mTableInsert.contentValues.put(INFO, "first");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        mCursor.close();
+        mTableInsert.contentValues.put(INFO, "second");
+        insertAndQuery(mTableInsert, TABLE_TABLE);
+
+        try {
+            assertEquals(1, mCursor.getCount());
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(2, mCursor.getInt(mCursor.getColumnIndex(VALUE)));
+            assertEquals("first", mCursor.getString(mCursor.getColumnIndex(INFO)));
+        } finally {
+            mCursor.close();
+        }
+    }
+
+    @Test
     public void tableCheck() throws Exception {
         mTableInsert.contentValues.put(INFO, "test");
         insertAndQuery(mTableInsert, TABLE_TABLE);
@@ -328,7 +369,7 @@ public class SimplDbTest {
     public void getColumns() throws Exception {
         SQLiteDatabase db = mSimplDb.getReadableDatabase();
         HashSet<String> columns = new HashSet<>(SimplDb.getColumns(db, getName(TableTest.class)));
-        assertEquals(new HashSet<>(Arrays.asList(DATA, INFO, KEEP, VALUE)), columns);
+        assertEquals(new HashSet<>(Arrays.asList(DATA, KEY, INFO, KEEP, VALUE)), columns);
     }
 
     void insertAndQuery(Insert insert, final String table) throws InterruptedException {

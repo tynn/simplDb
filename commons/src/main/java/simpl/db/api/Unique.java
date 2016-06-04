@@ -24,7 +24,9 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.FIELD })
+@Target(value = {ElementType.TYPE, ElementType.FIELD})
 public @interface Unique {
+	String[] columns() default {};
+
 	ConflictClause conflictClause() default ConflictClause.DEFAULT;
 }

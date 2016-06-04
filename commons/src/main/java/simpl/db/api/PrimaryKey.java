@@ -24,8 +24,10 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD})
+@Target(value = {ElementType.TYPE, ElementType.FIELD})
 public @interface PrimaryKey {
+    String[] columns() default {};
+
     boolean autoincrement() default false;
 
     Sortorder sortorder() default Sortorder.DEFAULT;

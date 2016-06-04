@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to define a column in a table.
  * <p>
- * The column field must be defined for a {@link TableDef} implementation must match
+ * The column field must be defined for a {@link TableDef} implementation and must match
  * <br>{@code public static final String COLUMN_NAME = "column_name";}
  * </p>
  */
