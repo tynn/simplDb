@@ -71,7 +71,7 @@ This creates a query returning all rows and columns of the table.
 ##### Definition as a `@Query`
 
 This creates a query returning all rows and columns filtered by `Query`. Optionally other tables
-can be joined. The format specifiers ``%1$s` and ``%2$s` in the join constraint can be used as a
+can be joined. The format specifiers `%1$s` and `%2$s` in the join constraint can be used as a
 placeholder for the query and the join table.
 
     @Query(table = MyTable.class, columns = {MyTable.MY_NAME}, limit = 2)
@@ -90,8 +90,8 @@ A default constructor must be provided for this implementation.
 
 Get the latest release from the [JitPack repository][2]
 
-    compile 'com.github.tynn.simpldb:library:0.4@aar'
-    apt 'com.github.tynn.simpldb:compiler:0.4'
+    compile 'com.github.tynn.simpldb:library:0.5'
+    apt 'com.github.tynn.simpldb:compiler:0.5'
 
 ### Proguard
 
