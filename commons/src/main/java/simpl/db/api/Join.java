@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation to define a join clause of a query.
  * <p>
- * An implementation of {@link QueryDef} annotated with {@link @Query}
+ * An implementation of {@link QueryDef} annotated with {@link Query}
  * may also be annotated with {@code @Join}.
  * </p>
  */
