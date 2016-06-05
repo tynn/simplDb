@@ -22,7 +22,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
+import simpl.db.api.Column;
+import simpl.db.api.Constraint;
 import simpl.db.api.Database;
 import simpl.db.api.Table;
 import simpl.db.db.TestDatabase;
@@ -69,18 +72,31 @@ public class SimplProcessorTest {
         assertEquals(tableAnn, spec.annotation);
         assertEquals(tableDef.getSimpleName(), spec.name);
 
-        for (Annotation constraint : spec.constraints) {
-            Class<?> ann = constraint.getClass().getInterfaces()[0];
-            assertEquals(tableDef.getAnnotation((Class<? extends Annotation>) ann), constraint);
-        }
-
         HashMap<String, HashSet<? extends Annotation>> columnSpecs = spec.columnSpecs;
         assertEquals(3, columnSpecs.size());
 
-        for (Field field : tableDef.getFields())
-            for (Annotation columnSpec : columnSpecs.get(field.get(null).toString())) {
-                Class<?> ann = columnSpec.getClass().getInterfaces()[0];
-                assertEquals(field.getAnnotation((Class<? extends Annotation>) ann), columnSpec);
-            }
+        LinkedList<Annotation> uncheckedConstraints = new LinkedList<>();
+        for (Annotation constraint : spec.constraints) {
+            Class<?> ann = constraint.getClass().getInterfaces()[0];
+            Annotation expected = tableDef.getAnnotation((Class<? extends Annotation>) ann);
+            if (expected != null)
+                assertEquals(expected, constraint);
+            else
+                uncheckedConstraints.add(constraint);
+        }
+
+        for (Field field : tableDef.getFields()) {
+            if (field.getAnnotation(Constraint.class) != null)
+                for (Annotation annotation : field.getAnnotations())
+                    uncheckedConstraints.remove(annotation);
+
+            if (field.getAnnotation(Column.class) != null)
+                for (Annotation columnSpec : columnSpecs.get(field.get(null).toString())) {
+                    Class<?> ann = columnSpec.getClass().getInterfaces()[0];
+                    assertEquals(field.getAnnotation((Class<? extends Annotation>) ann), columnSpec);
+                }
+        }
+
+        assertEquals(0, uncheckedConstraints.size());
     }
 }

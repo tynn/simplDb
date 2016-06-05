@@ -31,6 +31,7 @@ import lombok.ast.VariableDefinitionEntry;
 import simpl.db.internal.SimplName;
 
 import static simpl.db.lint.SimplLintDetector.COLUMN_NAME;
+import static simpl.db.lint.SimplLintDetector.CONSTRAINT_NAME;
 import static simpl.db.lint.SimplLintDetector.SQL_KEYWORD;
 
 public class SimplLintVisitor extends ForwardingAstVisitor {
@@ -48,27 +49,38 @@ public class SimplLintVisitor extends ForwardingAstVisitor {
                 if (parent instanceof Modifiers && !verifyColumn((Modifiers) parent))
                     mContext.report(COLUMN_NAME, node, mContext.getLocation(node), "must be a string constant");
                 return true;
+            case "Constraint":
+                if (parent instanceof Modifiers && !verifyConstraint((Modifiers) parent))
+                    mContext.report(CONSTRAINT_NAME, node, mContext.getLocation(node), "must be a string constant");
+                return true;
         }
         return false;
     }
 
-    private boolean verifyColumn(Modifiers node) {
+    private VariableDefinitionEntry getPublicStaticFinalStringVar(Modifiers node) {
         if (!isPublicStaticFinalField(node) && !isInterface(node))
-            return false;
+            return null;
 
         Node parent = node.getParent();
         if (!(parent instanceof VariableDefinition))
-            return false;
+            return null;
 
         VariableDefinition field = (VariableDefinition) parent;
         if (!field.astTypeReference().getTypeName().equals("String"))
-            return false;
+            return null;
 
         StrictListAccessor<VariableDefinitionEntry, VariableDefinition> vars = field.astVariables();
         if (vars.size() != 1)
+            return null;
+
+        return vars.first();
+    }
+
+    private boolean verifyColumn(Modifiers node) {
+        VariableDefinitionEntry var = getPublicStaticFinalStringVar(node);
+        if (var == null)
             return false;
 
-        VariableDefinitionEntry var = vars.first();
         Expression initializer = var.astInitializer();
         if (!(initializer instanceof StringLiteral))
             return false;
@@ -77,10 +89,28 @@ public class SimplLintVisitor extends ForwardingAstVisitor {
         String value = ((StringLiteral) initializer).astValue();
 
         if (!name.equals(value))
-            mContext.report(COLUMN_NAME, node, mContext.getLocation(parent), "must match " + SimplName.quote(name));
+            mContext.report(COLUMN_NAME, node, mContext.getLocation(node.getParent()), "must match " + SimplName.quote(name));
 
         if (SqlKeywords.contain(name))
             mContext.report(SQL_KEYWORD, mContext.getLocation(var.astName()), "use quoted with ContentValues");
+
+        return true;
+    }
+
+    private boolean verifyConstraint(Modifiers node) {
+        VariableDefinitionEntry var = getPublicStaticFinalStringVar(node);
+        if (var == null)
+            return false;
+
+        Expression initializer = var.astInitializer();
+        if (!(initializer instanceof StringLiteral))
+            return false;
+
+        String name = SimplName.from(var.astName().astValue());
+        String value = ((StringLiteral) initializer).astValue();
+
+        if (!name.equals(value))
+            mContext.report(CONSTRAINT_NAME, node, mContext.getLocation(node.getParent()), "must match " + SimplName.quote(name));
 
         return true;
     }

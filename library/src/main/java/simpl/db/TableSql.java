@@ -126,52 +126,22 @@ final class TableSql {
     }
 
     private boolean addConstraints(HashSet<? extends Annotation> constraints) {
-        PrimaryKey primaryKey = null;
-        Unique unique = null;
-        Check check = null;
-        ForeignKey foreignKey = null;
-        WithoutRowid withoutRowid = null;
+        boolean withoutRowid = false;
 
         for (Annotation ann : constraints) {
             if (ann instanceof PrimaryKey)
-                primaryKey = (PrimaryKey) ann;
+                handlePrimaryKey2((PrimaryKey) ann);
             else if (ann instanceof Unique)
-                unique = (Unique) ann;
+                handleUnique2((Unique) ann);
             else if (ann instanceof Check)
-                check = (Check) ann;
+                handleCheck2((Check) ann);
             else if (ann instanceof ForeignKey)
-                foreignKey = (ForeignKey) ann;
+                handleForeignKey2((ForeignKey) ann);
             else if (ann instanceof WithoutRowid)
-                withoutRowid = (WithoutRowid) ann;
+                withoutRowid = true;
         }
 
-        if (primaryKey != null) {
-            mSql.append(", PRIMARY KEY ");
-            if (!handleColumns(primaryKey.columns()))
-                throw new SimplError(PrimaryKey.class);
-            handleConflictClause(primaryKey.conflictClause());
-        }
-
-        if (unique != null) {
-            mSql.append(", UNIQUE ");
-            if (!handleColumns(unique.columns()))
-                throw new SimplError(Unique.class);
-            handleConflictClause(unique.conflictClause());
-        }
-
-        if (check != null) {
-            mSql.append(',');
-            handleCheck(check);
-        }
-
-        if (foreignKey != null) {
-            mSql.append(", FOREIGN KEY");
-            if (!handleColumns(foreignKey.columns()))
-                throw new SimplError(ForeignKey.class);
-            handleForeignKey(foreignKey);
-        }
-
-        return withoutRowid != null;
+        return withoutRowid;
     }
 
     private void handlePrimaryKey(PrimaryKey primaryKey) {
@@ -186,8 +156,22 @@ final class TableSql {
             mSql.append(" AUTOINCREMENT");
     }
 
+    private void handlePrimaryKey2(PrimaryKey primaryKey) {
+        mSql.append(", PRIMARY KEY ");
+        if (!handleColumns(primaryKey.columns()))
+            throw new SimplError(PrimaryKey.class);
+        handleConflictClause(primaryKey.conflictClause());
+    }
+
     private void handleUnique(Unique unique) {
         mSql.append(" UNIQUE");
+        handleConflictClause(unique.conflictClause());
+    }
+
+    private void handleUnique2(Unique unique) {
+        mSql.append(", UNIQUE ");
+        if (!handleColumns(unique.columns()))
+            throw new SimplError(Unique.class);
         handleConflictClause(unique.conflictClause());
     }
 
@@ -220,15 +204,27 @@ final class TableSql {
         mSql.append(" CHECK (").append(check.expression()).append(')');
     }
 
-    private void handleForeignKey(ForeignKey key) {
-        mSql.append(" REFERENCES ").append(SimplDb.getName(key.foreignTable()));
-        handleColumns(key.foreignColumns());
-        if (key.onDelete() != ForeignKeyAction.DEFAULT)
-            mSql.append(" ON DELETE ").append(key.onDelete().toString().replace('_', ' '));
-        if (key.onUpdate() != ForeignKeyAction.DEFAULT)
-            mSql.append(" ON UPDATE ").append(key.onUpdate().toString().replace('_', ' '));
-        if (key.deferrable())
+    private void handleCheck2(Check check) {
+        mSql.append(',');
+        handleCheck(check);
+    }
+
+    private void handleForeignKey(ForeignKey foreignKey) {
+        mSql.append(" REFERENCES ").append(SimplDb.getName(foreignKey.foreignTable()));
+        handleColumns(foreignKey.foreignColumns());
+        if (foreignKey.onDelete() != ForeignKeyAction.DEFAULT)
+            mSql.append(" ON DELETE ").append(foreignKey.onDelete().toString().replace('_', ' '));
+        if (foreignKey.onUpdate() != ForeignKeyAction.DEFAULT)
+            mSql.append(" ON UPDATE ").append(foreignKey.onUpdate().toString().replace('_', ' '));
+        if (foreignKey.deferrable())
             mSql.append(" DEFERRABLE INITIALLY DEFERRED");
+    }
+
+    private void handleForeignKey2(ForeignKey foreignKey) {
+        mSql.append(", FOREIGN KEY");
+        if (!handleColumns(foreignKey.columns()))
+            throw new SimplError(ForeignKey.class);
+        handleForeignKey(foreignKey);
     }
 
     private boolean handleColumns(String[] columns) {

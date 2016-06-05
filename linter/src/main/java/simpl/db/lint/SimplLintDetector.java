@@ -47,6 +47,11 @@ public class SimplLintDetector extends Detector implements Detector.JavaScanner 
                     "The value itself must conform to `SimplDb.getName()` of the constant name.",
             CATEGORY, 10, ERROR, IMPLEMENTATION);
 
+    static final Issue CONSTRAINT_NAME = Issue.create(NAME + "ConstraintName", "`@Constraint` annotation",
+            "The `@Constraint` annotation can only be used on a constant `String` value." +
+                    "The value itself must conform to `SimplDb.getName()` of the constant name.",
+            CATEGORY, 9, ERROR, IMPLEMENTATION);
+
     static final Issue SQL_KEYWORD = Issue.create(NAME + "SqlKeyword", "SQL keyword column name",
             "The column name is also an SQL keyword. When using this with `ContentValues`, you must use `SimplDb.quote()`.",
             CATEGORY, 2, INFORMATIONAL, IMPLEMENTATION);

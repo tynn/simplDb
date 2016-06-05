@@ -100,9 +100,11 @@ The following Proguard rules should be applied when using the .jar file.
     -keepnames @simpl.db.** class *
     -keepclassmembernames class * {
         @simpl.db.api.Column public static final java.lang.String *;
+        @simpl.db.api.Constraint public static final java.lang.String *;
     }
     -keepclasseswithmembers,allowobfuscation class * {
         @simpl.db.api.Column public static final java.lang.String *;
+        @simpl.db.api.Constraint public static final java.lang.String *;
     }
     -keepclassmembers class simpl.db.** { public final *; }
     -keep class * extends simpl.db.DatabaseSpec

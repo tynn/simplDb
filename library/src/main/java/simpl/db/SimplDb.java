@@ -47,6 +47,7 @@ import java.util.WeakHashMap;
 import simpl.db.api.Check;
 import simpl.db.api.Collate;
 import simpl.db.api.Column;
+import simpl.db.api.Constraint;
 import simpl.db.api.Database;
 import simpl.db.api.Default;
 import simpl.db.api.ForeignKey;
@@ -75,8 +76,8 @@ import simpl.db.spec.TableSpec;
 @SuppressWarnings("unused")
 public abstract class SimplDb implements SimplDef {
     static final String TAG = "simplDb#" + BuildConfig.VERSION_CODE;
-    private static final String MSG_FORMAT = "Column %1$s in %2$s must match " +
-            "'public static final String %1$s = \"%3$s\";'";
+    private static final String MSG_FORMAT = "%1$s %2$s in %3$s must match " +
+            "'public static final String %2$s = \"%4$s\";'";
 
     private static final String DATABASE_SPEC = "$$DatabaseSpec";
     private static final String TABLE_SPEC = "$$TableSpec";
@@ -191,8 +192,10 @@ public abstract class SimplDb implements SimplDef {
 
         spec = new TableSpec(getName(tableDef), table, tableDef);
         loadConstraints(spec);
-        for (Field field : tableDef.getFields())
+        for (Field field : tableDef.getFields()) {
+            loadConstraint(field, spec);
             loadColumnSpec(field, spec);
+        }
         T.put(tableDef, spec);
         return spec;
     }
@@ -207,6 +210,32 @@ public abstract class SimplDb implements SimplDef {
         if (WithoutRowid.SUPPORTED)
             constraints.add(tableDef.getAnnotation(WithoutRowid.class));
         constraints.remove(null);
+    }
+
+    private static boolean loadConstraint(Field field, TableSpec tableSpec) {
+        Constraint constraint = field.getAnnotation(Constraint.class);
+        if (constraint == null)
+            return false;
+
+        String fieldName = field.getName();
+        String name = getName(fieldName);
+        if (isPublicStaticFinalString(field)) {
+            try {
+                if (name.equals(field.get(null))) {
+                    HashSet<Annotation> constraints = tableSpec.constraints;
+                    constraints.add(field.getAnnotation(PrimaryKey.class));
+                    constraints.add(field.getAnnotation(Unique.class));
+                    constraints.add(field.getAnnotation(Check.class));
+                    constraints.add(field.getAnnotation(ForeignKey.class));
+                    constraints.remove(null);
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.d(SimplDb.TAG, "assert", e);
+            }
+        }
+
+        throw new SimplError(String.format(Locale.US, MSG_FORMAT, "Constraint", fieldName, tableSpec.name, name));
     }
 
     private static boolean loadColumnSpec(Field field, TableSpec tableSpec) {
@@ -237,7 +266,7 @@ public abstract class SimplDb implements SimplDef {
             }
         }
 
-        throw new SimplError(String.format(Locale.UK, MSG_FORMAT, fieldName, tableSpec.name, name));
+        throw new SimplError(String.format(Locale.UK, MSG_FORMAT, "Column", fieldName, tableSpec.name, name));
     }
 
 	/* SQLiteOpenHelper wrapper */

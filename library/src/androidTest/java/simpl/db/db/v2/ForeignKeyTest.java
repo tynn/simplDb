@@ -17,21 +17,28 @@
 package simpl.db.db.v2;
 
 import simpl.db.api.Column;
+import simpl.db.api.Constraint;
 import simpl.db.api.ForeignKey;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
-import simpl.db.api.TableDef.WithID;
 
 import static simpl.db.api.ColumnType.INTEGER;
 import static simpl.db.api.ForeignKeyAction.CASCADE;
 
 @Table
 @ForeignKey(columns = ForeignKeyTest.FOREIGN_KEY2, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
-public interface ForeignKeyTest extends TableDef, WithID {
+public interface ForeignKeyTest extends TableDef {
     @Column(type = INTEGER)
     @ForeignKey(foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
     String FOREIGN_KEY1 = "foreign_key1";
 
     @Column(type = INTEGER)
     String FOREIGN_KEY2 = "foreign_key2";
+
+    @Column(type = INTEGER)
+    String FOREIGN_KEY3 = "foreign_key3";
+
+    @Constraint
+    @ForeignKey(columns = FOREIGN_KEY3, foreignTable = TypeTest.class, foreignColumns = TypeTest._ID, onDelete = CASCADE)
+    String FOREIGN_KEY3_CONSTRAINT = "foreign_key3_constraint";
 }

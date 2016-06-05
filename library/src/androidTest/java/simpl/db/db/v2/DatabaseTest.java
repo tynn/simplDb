@@ -21,7 +21,7 @@ import android.content.Context;
 import simpl.db.api.Database;
 import simpl.db.SimplDb;
 
-@Database(tables = {ColumnTest.class, TableTest.class, TypeTest.class, ForeignKeyTest.class}, version = 2)
+@Database(version = 2, tables = {ColumnTest.class, ConstraintTest.class, ForeignKeyTest.class, TableTest.class, TypeTest.class})
 public class DatabaseTest extends SimplDb {
     public DatabaseTest(Context context) {
         super(context);

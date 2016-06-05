@@ -29,6 +29,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import simpl.db.api.Column;
+import simpl.db.api.Constraint;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
 import simpl.db.internal.SimplName;
@@ -42,34 +43,52 @@ class TableSpecWriter extends SimplSpecWriter {
     @Override
     void writeSpecs(TypeElement type, AnnotationMirror annotation, String indent) {
         writeConstraints(type, annotation, indent);
-        writeColumnSpecs(type, indent);
+        Fields fields = new Fields();
+        collectFields(type, fields);
+        writeConstraints2(fields, indent);
+        writeColumnSpecs(fields, indent);
     }
 
-    @SuppressWarnings("Convert2streamapi")
+    private void writeConstraint(AnnotationMirror annotation, String indent) {
+        writer.print(indent);
+        writer.print("constraints.add(new ");
+        writer.print(annotation.getAnnotationType());
+        writer.println("() {");
+        writeAnnotation(annotation, indent + TAB);
+        writer.print(indent);
+        writer.println("});");
+    }
+
     private void writeConstraints(TypeElement type, AnnotationMirror table, String indent) {
         for (AnnotationMirror annotation : type.getAnnotationMirrors())
-            if (!table.equals(annotation)) {
-                writer.print(indent);
-                writer.print("constraints.add(new ");
-                writer.print(annotation.getAnnotationType());
-                writer.println("() {");
-                writeAnnotation(annotation, indent + TAB);
-                writer.print(indent);
-                writer.println("});");
-            }
+            if (!table.equals(annotation))
+                writeConstraint(annotation, indent);
     }
 
-    private void writeColumnSpecs(TypeElement type, String indent) {
+    private void writeConstraints2(Fields fields, String indent) {
+        for (VariableElement field : fields.constraints)
+            for (AnnotationMirror annotation : field.getAnnotationMirrors())
+                if (!isAnnotationType(annotation, Column.class, Constraint.class))
+                    writeConstraint(annotation, indent);
+    }
+
+    @SafeVarargs
+    private static boolean isAnnotationType(AnnotationMirror annotation, Class<? extends Annotation>... anns) {
+        for (Class<? extends Annotation> ann : anns)
+            if (ann.getName().equals(annotation.getAnnotationType().toString()))
+                return true;
+        return false;
+    }
+
+    private void writeColumnSpecs(Fields fields, String indent) {
         writer.print(indent);
         writer.print(HashSet.class.getName());
         writer.print("<");
         writer.print(Annotation.class.getName());
         writer.println("> annotations;");
 
-        HashSet<VariableElement> columns = new HashSet<>();
-        collectColumns(type, columns);
         HashSet<String> columnNames = new HashSet<>();
-        for (VariableElement field : columns) {
+        for (VariableElement field : fields.columns) {
             String name = SimplName.from(field.getSimpleName().toString());
             if (!columnNames.add(name))
                 error(field + " provides a duplicated column " + name, field, null);
@@ -104,16 +123,38 @@ class TableSpecWriter extends SimplSpecWriter {
         return false;
     }
 
+    private boolean verifyConstraint(VariableElement field) {
+        AnnotationMirror constraint = getAnnotation(field, Constraint.class);
+        if (constraint == null)
+            return false;
+        String name = SimplName.from(field.getSimpleName().toString());
+        if (name.equals(field.getConstantValue().toString()))
+            return true;
+        error(field + " must have a constant value of \"" + name + "\"", field, constraint);
+        return false;
+    }
+
     @SuppressWarnings("Convert2streamapi")
-    private void collectColumns(TypeElement type, HashSet<VariableElement> columns) {
+    private void collectFields(TypeElement type, Fields fields) {
         TypeMirror s = type.getSuperclass();
         if (s.getKind() != TypeKind.NONE)
-            collectColumns((TypeElement) types.asElement(s), columns);
+            collectFields((TypeElement) types.asElement(s), fields);
         for (TypeMirror i : type.getInterfaces())
-            collectColumns((TypeElement) types.asElement(i), columns);
+            collectFields((TypeElement) types.asElement(i), fields);
         for (Element e : type.getEnclosedElements())
-            if (e.getKind() == ElementKind.FIELD && e.getAnnotation(Column.class) != null)
+            if (e.getKind() == ElementKind.FIELD) {
                 if (verifyColumn((VariableElement) e))
-                    columns.add((VariableElement) e);
+                    fields.columns.add((VariableElement) e);
+                if (verifyConstraint((VariableElement) e))
+                    fields.constraints.add((VariableElement) e);
+            }
+    }
+
+    private static class Fields {
+        final HashSet<VariableElement> constraints = new HashSet<>();
+        final HashSet<VariableElement> columns = new HashSet<>();
+
+        Fields() {
+        }
     }
 }

@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package simpl.db.db;
-
+package simpl.db.db.v2;
 
 import simpl.db.api.Check;
 import simpl.db.api.Column;
+import simpl.db.api.ColumnType;
 import simpl.db.api.Constraint;
-import simpl.db.api.Default;
+import simpl.db.api.PrimaryKey;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
 import simpl.db.api.Unique;
-import simpl.db.api.WithoutRowid;
-
-import static simpl.db.api.ColumnType.INTEGER;
-import static simpl.db.api.ColumnType.TEXT;
 
 @Table
-@WithoutRowid
-@Check(expression = "")
-public interface TestTable extends TableDef {
-    @Column(type = TEXT)
+public interface ConstraintTest extends TableDef {
+    @Column(type = ColumnType.INTEGER)
     String KEY1 = "key1";
 
-    @Column(type = TEXT)
-    @Unique
+    @Column(type = ColumnType.INTEGER)
     String KEY2 = "key2";
 
-    @Column(type = INTEGER)
-    @Default("4")
+    @Column(type = ColumnType.INTEGER)
     String KEY3 = "key3";
 
+    @Column(type = ColumnType.INTEGER)
+    String KEY4 = "key4";
+
     @Constraint
-    @Unique(columns = {KEY1, KEY2})
+    @PrimaryKey(columns = {KEY1, KEY2})
+    @Unique(columns = KEY3)
     String CONST1 = "const1";
+
+    @Constraint
+    @Check(expression = KEY4 + "!=7")
+    String CONST2 = "const2";
 }
