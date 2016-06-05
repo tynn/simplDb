@@ -46,7 +46,7 @@ public interface ColumnTest extends TableDef, WithID {
     String NOT_NULL = "not_null";
 
     @Column(type = INTEGER)
-    @Check(expression = "\"check\"<3")
+    @Check(expression = "%1$s<3")
     String CHECK = "check";
     String CHECK$ = quote(CHECK);
 

@@ -19,6 +19,7 @@ package simpl.db;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,8 +105,9 @@ final class TableSql {
 
         mColumns.add(name);
         mSql.append(delim);
-        mSql.append('"').append(name).append('"');
-        mSql.append(' ').append(column.type());
+
+        name = SimplDb.quote(name);
+        mSql.append(name).append(' ').append(column.type());
 
         if (primaryKey != null)
             handlePrimaryKey(primaryKey);
@@ -114,7 +116,7 @@ final class TableSql {
         if (unique != null)
             handleUnique(unique);
         if (check != null)
-            handleCheck(check);
+            handleCheck(check, name);
         if (defaultValue != null)
             handleDefault(defaultValue);
         if (collate != null)
@@ -200,13 +202,17 @@ final class TableSql {
         mSql.append(" COLLATE ").append(collation.collationName());
     }
 
-    private void handleCheck(Check check) {
-        mSql.append(" CHECK (").append(check.expression()).append(')');
+    private void handleCheck(String expression) {
+        mSql.append(" CHECK (").append(expression).append(')');
+    }
+
+    private void handleCheck(Check check, String name) {
+        handleCheck(String.format(Locale.US, check.expression(), name));
     }
 
     private void handleCheck2(Check check) {
         mSql.append(',');
-        handleCheck(check);
+        handleCheck(check.expression());
     }
 
     private void handleForeignKey(ForeignKey foreignKey) {
