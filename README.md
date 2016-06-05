@@ -93,23 +93,6 @@ Get the latest release from the [JitPack repository][2]
     compile 'com.github.tynn.simpldb:library:0.5'
     apt 'com.github.tynn.simpldb:compiler:0.5'
 
-### Proguard
-
-The following Proguard rules should be applied when using the .jar file.
-
-    -keepnames @simpl.db.** class *
-    -keepclassmembernames class * {
-        @simpl.db.api.Column public static final java.lang.String *;
-        @simpl.db.api.Constraint public static final java.lang.String *;
-    }
-    -keepclasseswithmembers,allowobfuscation class * {
-        @simpl.db.api.Column public static final java.lang.String *;
-        @simpl.db.api.Constraint public static final java.lang.String *;
-    }
-    -keepclassmembers class simpl.db.** { public final *; }
-    -keep class * extends simpl.db.DatabaseSpec
-    -keep class * extends simpl.db.TableSpec
-
 
 ## License
 
