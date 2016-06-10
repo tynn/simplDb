@@ -49,9 +49,16 @@ class TableSpecWriter extends SimplSpecWriter {
         writeColumnSpecs(fields, indent);
     }
 
-    private void writeConstraint(AnnotationMirror annotation, String indent) {
+    private void writeConstraint(String value, AnnotationMirror annotation, String indent) {
+        String name = annotation.getAnnotationType().asElement().getSimpleName().toString();
+        if (value != null)
+            name += '_' + value;
+        name = SimplName.from(name);
+
         writer.print(indent);
-        writer.print("constraints.add(new ");
+        writer.print("constraints.put(\"");
+        writer.print(name);
+        writer.print("\", new ");
         writer.print(annotation.getAnnotationType());
         writer.println("() {");
         writeAnnotation(annotation, indent + TAB);
@@ -62,14 +69,14 @@ class TableSpecWriter extends SimplSpecWriter {
     private void writeConstraints(TypeElement type, AnnotationMirror table, String indent) {
         for (AnnotationMirror annotation : type.getAnnotationMirrors())
             if (!table.equals(annotation))
-                writeConstraint(annotation, indent);
+                writeConstraint(null, annotation, indent);
     }
 
     private void writeConstraints2(Fields fields, String indent) {
         for (VariableElement field : fields.constraints)
             for (AnnotationMirror annotation : field.getAnnotationMirrors())
                 if (!isAnnotationType(annotation, Column.class, Constraint.class))
-                    writeConstraint(annotation, indent);
+                    writeConstraint(field.getSimpleName().toString(), annotation, indent);
     }
 
     @SafeVarargs

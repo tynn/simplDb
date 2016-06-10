@@ -18,6 +18,7 @@ package simpl.db;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -127,10 +128,12 @@ final class TableSql {
         return true;
     }
 
-    private boolean addConstraints(HashSet<? extends Annotation> constraints) {
+    private boolean addConstraints(HashMap<String, ? extends Annotation> constraints) {
         boolean withoutRowid = false;
 
-        for (Annotation ann : constraints) {
+        for (Map.Entry<String, ? extends Annotation> entry : constraints.entrySet()) {
+            mSql.append(", CONSTRAINT ").append(SimplDb.quote(entry.getKey()));
+            Annotation ann = entry.getValue();
             if (ann instanceof PrimaryKey)
                 handlePrimaryKey2((PrimaryKey) ann);
             else if (ann instanceof Unique)
@@ -159,9 +162,8 @@ final class TableSql {
     }
 
     private void handlePrimaryKey2(PrimaryKey primaryKey) {
-        mSql.append(", PRIMARY KEY ");
-        if (!handleColumns(primaryKey.columns()))
-            throw new SimplError(PrimaryKey.class);
+        mSql.append(" PRIMARY KEY ");
+        handleColumns(primaryKey.columns(), PrimaryKey.class);
         handleConflictClause(primaryKey.conflictClause());
     }
 
@@ -171,9 +173,8 @@ final class TableSql {
     }
 
     private void handleUnique2(Unique unique) {
-        mSql.append(", UNIQUE ");
-        if (!handleColumns(unique.columns()))
-            throw new SimplError(Unique.class);
+        mSql.append(" UNIQUE ");
+        handleColumns(unique.columns(), Unique.class);
         handleConflictClause(unique.conflictClause());
     }
 
@@ -211,13 +212,12 @@ final class TableSql {
     }
 
     private void handleCheck2(Check check) {
-        mSql.append(',');
         handleCheck(check.expression());
     }
 
     private void handleForeignKey(ForeignKey foreignKey) {
         mSql.append(" REFERENCES ").append(SimplDb.getName(foreignKey.foreignTable()));
-        handleColumns(foreignKey.foreignColumns());
+        handleColumns(foreignKey.foreignColumns(), null);
         if (foreignKey.onDelete() != ForeignKeyAction.DEFAULT)
             mSql.append(" ON DELETE ").append(foreignKey.onDelete().toString().replace('_', ' '));
         if (foreignKey.onUpdate() != ForeignKeyAction.DEFAULT)
@@ -227,21 +227,20 @@ final class TableSql {
     }
 
     private void handleForeignKey2(ForeignKey foreignKey) {
-        mSql.append(", FOREIGN KEY");
-        if (!handleColumns(foreignKey.columns()))
-            throw new SimplError(ForeignKey.class);
+        mSql.append(" FOREIGN KEY");
+        handleColumns(foreignKey.columns(), ForeignKey.class);
         handleForeignKey(foreignKey);
     }
 
-    private boolean handleColumns(String[] columns) {
-        if (columns.length == 0)
-            return false;
-
-        mSql.append(" (").append(columns[0]);
-        for (int i = 1; i < columns.length; i++)
-            mSql.append(", ").append(columns[i]);
-        mSql.append(')');
-        return true;
+    private void handleColumns(String[] columns, Class<? extends Annotation> ann) {
+        if (columns.length != 0) {
+            mSql.append(" (").append(columns[0]);
+            for (int i = 1; i < columns.length; i++)
+                mSql.append(", ").append(columns[i]);
+            mSql.append(')');
+        } else if (ann != null) {
+            throw new SimplError(ann);
+        }
     }
 
     String getName() {

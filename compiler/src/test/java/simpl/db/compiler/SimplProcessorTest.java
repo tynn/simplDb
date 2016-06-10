@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Map;
 
 import simpl.db.api.Column;
 import simpl.db.api.Constraint;
@@ -34,6 +34,7 @@ import simpl.db.spec.DatabaseSpec;
 import simpl.db.spec.TableSpec;
 
 import static org.junit.Assert.assertEquals;
+import static simpl.db.internal.SimplName.from;
 
 public class SimplProcessorTest {
 
@@ -75,20 +76,28 @@ public class SimplProcessorTest {
         HashMap<String, HashSet<? extends Annotation>> columnSpecs = spec.columnSpecs;
         assertEquals(3, columnSpecs.size());
 
-        LinkedList<Annotation> uncheckedConstraints = new LinkedList<>();
-        for (Annotation constraint : spec.constraints) {
+        HashMap<String, Annotation> uncheckedConstraints = new HashMap<>();
+        for (Map.Entry<String, Annotation> entry : spec.constraints.entrySet()) {
+            String name = entry.getKey();
+            Annotation constraint = entry.getValue();
             Class<?> ann = constraint.getClass().getInterfaces()[0];
             Annotation expected = tableDef.getAnnotation((Class<? extends Annotation>) ann);
             if (expected != null)
                 assertEquals(expected, constraint);
             else
-                uncheckedConstraints.add(constraint);
+                uncheckedConstraints.put(name, constraint);
         }
 
         for (Field field : tableDef.getFields()) {
+            String fieldValue = field.get(null).toString();
+
             if (field.getAnnotation(Constraint.class) != null)
-                for (Annotation annotation : field.getAnnotations())
-                    uncheckedConstraints.remove(annotation);
+                for (Annotation expected : field.getAnnotations()) {
+                    String name = from(expected.annotationType().getSimpleName() + '_' + fieldValue);
+                    Annotation constraint = uncheckedConstraints.remove(name);
+                    if (constraint != null)
+                        assertEquals(expected, constraint);
+                }
 
             if (field.getAnnotation(Column.class) != null)
                 for (Annotation columnSpec : columnSpecs.get(field.get(null).toString())) {

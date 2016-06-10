@@ -28,7 +28,7 @@ import simpl.db.api.TableDef;
  */
 public class TableSpec extends SimplSpec<Table, TableDef> {
     public final HashMap<String, HashSet<? extends Annotation>> columnSpecs = new HashMap<>();
-    public final HashSet<Annotation> constraints = new HashSet<>();
+    public final HashMap<String, Annotation> constraints = new HashMap<>();
 
     /**
      * @param name     as of {@link Class#getSimpleName()}

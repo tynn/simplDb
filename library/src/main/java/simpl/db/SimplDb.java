@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public abstract class SimplDb implements SimplDef {
     private static final String TABLE_SPEC = "$$TableSpec";
 
     private static final HashMap<Class<? extends SimplDb>, DatabaseSpec> D = new HashMap<>();
-    private static final HashMap<Class<? extends SimplDef>, String> S = new HashMap<>();
+    private static final HashMap<Class<?>, String> S = new HashMap<>();
     private static final HashMap<Class<? extends TableDef>, TableSpec> T = new HashMap<>();
 
     private static final Handler uiHandler = new Handler(Looper.getMainLooper());
@@ -202,14 +203,28 @@ public abstract class SimplDb implements SimplDef {
 
     private static void loadConstraints(TableSpec tableSpec) {
         Class<? extends TableDef> tableDef = tableSpec.simplDef;
-        HashSet<Annotation> constraints = tableSpec.constraints;
-        constraints.add(tableDef.getAnnotation(PrimaryKey.class));
-        constraints.add(tableDef.getAnnotation(Unique.class));
-        constraints.add(tableDef.getAnnotation(Check.class));
-        constraints.add(tableDef.getAnnotation(ForeignKey.class));
+        HashMap<String, Annotation> constraints = tableSpec.constraints;
+        add(constraints, tableDef, PrimaryKey.class);
+        add(constraints, tableDef, Unique.class);
+        add(constraints, tableDef, Check.class);
+        add(constraints, tableDef, ForeignKey.class);
         if (WithoutRowid.SUPPORTED)
-            constraints.add(tableDef.getAnnotation(WithoutRowid.class));
+            add(constraints, tableDef, WithoutRowid.class);
         constraints.remove(null);
+    }
+
+    private static void add(HashMap<String, Annotation> c, AnnotatedElement el, Class<? extends Annotation> ann) {
+        Annotation constraint = el.getAnnotation(ann);
+        if (constraint != null) {
+            String name = getName(getSimpleName(ann));
+            if (el instanceof Field)
+                try {
+                    name += "_" + ((Field) el).get(null);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            c.put(name, constraint);
+        }
     }
 
     private static boolean loadConstraint(Field field, TableSpec tableSpec) {
@@ -222,11 +237,11 @@ public abstract class SimplDb implements SimplDef {
         if (isPublicStaticFinalString(field)) {
             try {
                 if (name.equals(field.get(null))) {
-                    HashSet<Annotation> constraints = tableSpec.constraints;
-                    constraints.add(field.getAnnotation(PrimaryKey.class));
-                    constraints.add(field.getAnnotation(Unique.class));
-                    constraints.add(field.getAnnotation(Check.class));
-                    constraints.add(field.getAnnotation(ForeignKey.class));
+                    HashMap<String, Annotation> constraints = tableSpec.constraints;
+                    add(constraints, field, PrimaryKey.class);
+                    add(constraints, field, Unique.class);
+                    add(constraints, field, Check.class);
+                    add(constraints, field, ForeignKey.class);
                     constraints.remove(null);
                     return true;
                 }
@@ -1042,10 +1057,10 @@ public abstract class SimplDb implements SimplDef {
         return getName(getSimpleName(simplDef));
     }
 
-    private static String getSimpleName(Class<? extends SimplDef> simplDef) {
-        String simpleName = S.get(simplDef);
+    private static String getSimpleName(Class<?> cls) {
+        String simpleName = S.get(cls);
         if (simpleName == null)
-            S.put(simplDef, simpleName = simplDef.getSimpleName());
+            S.put(cls, simpleName = cls.getSimpleName());
         return simpleName;
     }
 
