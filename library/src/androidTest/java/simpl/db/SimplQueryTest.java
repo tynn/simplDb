@@ -20,8 +20,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -31,12 +31,11 @@ import simpl.db.SimplQuery.Filter;
 import simpl.db.api.Join;
 import simpl.db.api.Query;
 import simpl.db.api.QueryDef;
-import simpl.db.db.v10.DatabaseTest;
 import simpl.db.db.v10.JoinTest;
 import simpl.db.db.v10.QueryTest;
 import simpl.db.db.v10.TableTest;
+import simpl.db.test.SimplDbTestRule;
 
-import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static simpl.db.SimplQuery.get;
@@ -45,22 +44,13 @@ import static simpl.db.api.JoinType.LEFT;
 import static simpl.db.api.Sortorder.DESC;
 
 public class SimplQueryTest {
-    static SimplDb sSimplDb;
     Cursor mCursor;
 
-    private static void sleep(int millis) {
-        try {
-            synchronized (sSimplDb) {
-                sSimplDb.wait(millis);
-            }
-        } catch (InterruptedException e) {
-        }
-    }
+    @Rule
+    public SimplDbTestRule mSimplDb = new SimplDbTestRule(10);
 
-    @BeforeClass
-    public static void setupDatabase() {
-        SimplDbTest.deleteAllDatabases();
-        sSimplDb = new DatabaseTest(getContext());
+    @Before
+    public void setupDatabase() {
         ContentValues values = new ContentValues();
         setupTableTest(values);
         values.clear();
@@ -69,43 +59,38 @@ public class SimplQueryTest {
         setupJoinTest(values);
     }
 
-    @AfterClass
-    public static void deleteDatabase() {
-        sSimplDb.delete();
-    }
-
     @After
     public void closeCursor() {
         if (mCursor != null && !mCursor.isClosed())
             mCursor.close();
     }
 
-    private static void setupTableTest(ContentValues values) {
+    private void setupTableTest(ContentValues values) {
         values.put(TableTest.DATA, "payload");
-        sSimplDb.insert(TableTest.class, values, null);
+        mSimplDb.get().insert(TableTest.class, values, null);
         sleep(50);
-        sSimplDb.insert(TableTest.class, values, null);
+        mSimplDb.get().insert(TableTest.class, values, null);
     }
 
     @Test
     public void queryTable() throws Exception {
-        mCursor = get(TableTest.class).exec(sSimplDb, null);
+        mCursor = get(TableTest.class).exec(mSimplDb.get(), null);
         assertEquals(2, mCursor.getCount());
         assertEquals(2, mCursor.getColumnCount());
     }
 
-    private static void insertToQueryTest(ContentValues values, String key, String value, int ref) {
+    private void insertToQueryTest(ContentValues values, String key, String value, int ref) {
         values.put(QueryTest.KEY, key);
         values.put(QueryTest.VALUE, value);
         values.put(QueryTest.REF, ref);
-        sSimplDb.insert(QueryTest.class, values, null);
+        mSimplDb.get().insert(QueryTest.class, values, null);
     }
 
     @Query(table = QueryTest.class, columns = {QueryTest.KEY, QueryTest.VALUE})
     private interface QueryTestQuery extends QueryDef {
     }
 
-    private static void setupQueryTest(ContentValues values) {
+    private void setupQueryTest(ContentValues values) {
         insertToQueryTest(values, "foo", "bar", 1);
         insertToQueryTest(values, "Foo", "Bar", 2);
         insertToQueryTest(values, "fOo", "bar", 1);
@@ -115,7 +100,7 @@ public class SimplQueryTest {
 
     @Test
     public void query() throws Exception {
-        mCursor = get(QueryTestQuery.class).exec(sSimplDb, null);
+        mCursor = get(QueryTestQuery.class).exec(mSimplDb.get(), null);
         assertEquals(5, mCursor.getCount());
         assertEquals(2, mCursor.getColumnCount());
         final List<String> columns = Arrays.asList(QueryTest.KEY, QueryTest.VALUE);
@@ -128,17 +113,17 @@ public class SimplQueryTest {
         filter.setLimit(1);
         filter.setSelection(QueryTest.VALUE + "=?", "bar");
         filter.setOrderBy(QueryTest._ID + ' ' + DESC);
-        mCursor = get(QueryTestQuery.class).exec(sSimplDb, filter);
+        mCursor = get(QueryTestQuery.class).exec(mSimplDb.get(), filter);
         assertTrue(mCursor.moveToFirst());
         assertEquals(2, mCursor.getColumnCount());
         final int column = mCursor.getColumnIndex(QueryTest.KEY);
         assertEquals("fOo", mCursor.getString(column));
     }
 
-    private static void insertToJoinTest(ContentValues values, String extra, int ref) {
+    private void insertToJoinTest(ContentValues values, String extra, int ref) {
         values.put(JoinTest.EXTRA, extra);
         values.put(JoinTest.REF, ref);
-        sSimplDb.insert(JoinTest.class, values, null);
+        mSimplDb.get().insert(JoinTest.class, values, null);
     }
 
     @Query(table = QueryTest.class, columns = {QueryTest.KEY, QueryTest.VALUE})
@@ -147,7 +132,7 @@ public class SimplQueryTest {
         String ON = "%1$s." + QueryTest.REF + "=%2$s." + JoinTest._ID;
     }
 
-    private static void setupJoinTest(ContentValues values) {
+    private void setupJoinTest(ContentValues values) {
         insertToJoinTest(values, "baz", 1);
         insertToJoinTest(values, "Baz", 2);
         insertToJoinTest(values, "bAz", 1);
@@ -160,7 +145,7 @@ public class SimplQueryTest {
 
     @Test
     public void queryJoin() throws Exception {
-        mCursor = get(JoinTestQuery.class).exec(sSimplDb, null);
+        mCursor = get(JoinTestQuery.class).exec(mSimplDb.get(), null);
         assertEquals(4, mCursor.getCount());
         assertEquals(3, mCursor.getColumnCount());
         final int valueColumn = mCursor.getColumnIndex(QueryTest.VALUE);
@@ -179,7 +164,7 @@ public class SimplQueryTest {
 
     @Test
     public void queryLeftJoin() throws Exception {
-        mCursor = get(LeftJoinTestQuery.class).exec(sSimplDb, null);
+        mCursor = get(LeftJoinTestQuery.class).exec(mSimplDb.get(), null);
         assertEquals(5, mCursor.getCount());
         assertEquals(3, mCursor.getColumnCount());
         final int valueColumn = mCursor.getColumnIndex(QueryTest.VALUE);
@@ -201,7 +186,7 @@ public class SimplQueryTest {
 
     @Test
     public void queryCrossJoin() throws Exception {
-        mCursor = get(CrossJoinTestQuery.class).exec(sSimplDb, null);
+        mCursor = get(CrossJoinTestQuery.class).exec(mSimplDb.get(), null);
         assertEquals(10, mCursor.getCount());
         assertEquals(3, mCursor.getColumnCount());
         final int valueColumn = mCursor.getColumnIndex(QueryTest.VALUE);
@@ -222,6 +207,16 @@ public class SimplQueryTest {
                 valueFirstLower++;
             }
             assertEquals(valueFirstLower, extraFirstLower);
+        }
+    }
+
+    @SuppressWarnings("EmptyCatchBlock")
+    private void sleep(int millis) {
+        try {
+            synchronized (this) {
+                wait(millis);
+            }
+        } catch (InterruptedException e) {
         }
     }
 }

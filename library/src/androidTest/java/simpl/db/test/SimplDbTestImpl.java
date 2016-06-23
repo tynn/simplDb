@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package simpl.db.db.v10;
+package simpl.db.test;
 
-import simpl.db.api.Database;
-import simpl.db.test.SimplDbTestImpl;
+import simpl.db.SimplDb;
 
-@Database(tables = {TableTest.class, QueryTest.class, JoinTest.class}, version = 10)
-public class DatabaseTest extends SimplDbTestImpl {
+import static android.support.test.InstrumentationRegistry.getContext;
+
+public class SimplDbTestImpl extends SimplDb {
+    public SimplDbTestImpl() {
+        super(getContext());
+    }
 }

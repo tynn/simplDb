@@ -16,13 +16,9 @@
 
 package simpl.db;
 
-import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -33,12 +29,12 @@ import simpl.db.SimplDb.Insert.Callback;
 import simpl.db.api.TableDef;
 import simpl.db.db.v2.ColumnTest;
 import simpl.db.db.v2.ConstraintTest;
-import simpl.db.db.v2.DatabaseTest;
 import simpl.db.db.v2.ForeignKeyTest;
 import simpl.db.db.v2.TableTest;
 import simpl.db.db.v2.TypeTest;
+import simpl.db.test.InsertTestRule;
+import simpl.db.test.SimplDbTestRule;
 
-import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -78,36 +74,25 @@ public class SimplDbTest {
     static final String TABLE_TABLE = getName(TableTest.class);
     static final String TYPE_TABLE = getName(TypeTest.class);
 
-    final Insert mColumnInsert = new Insert(ColumnTest.class, null);
-    final Insert mConstraintInsert = new Insert(ConstraintTest.class, null);
-    final Insert mForeignKeyInsert = new Insert(ForeignKeyTest.class, null);
-    final Insert mTableInsert = new Insert(TableTest.class, null);
-    final Insert mTypedInsert = new Insert(TypeTest.class, null);
-
-    SimplDb mSimplDb;
     Cursor mCursor;
 
-    @BeforeClass
-    public static void deleteAllDatabases() {
-        Context context = getContext();
-        for (String database : context.databaseList())
-            context.deleteDatabase(database);
-    }
+    @Rule
+    public InsertTestRule mColumnInsert = new InsertTestRule(ColumnTest.class);
 
-    @Before
-    public void createDatabase() {
-        mSimplDb = new DatabaseTest(getContext());
-        mColumnInsert.contentValues.clear();
-        mConstraintInsert.contentValues.clear();
-        mForeignKeyInsert.contentValues.clear();
-        mTableInsert.contentValues.clear();
-        mTypedInsert.contentValues.clear();
-    }
+    @Rule
+    public InsertTestRule mConstraintInsert = new InsertTestRule(ConstraintTest.class);
 
-    @After
-    public void deleteDatabase() {
-        mSimplDb.delete();
-    }
+    @Rule
+    public InsertTestRule mForeignKeyInsert = new InsertTestRule(ForeignKeyTest.class);
+
+    @Rule
+    public InsertTestRule mTableInsert = new InsertTestRule(TableTest.class);
+
+    @Rule
+    public InsertTestRule mTypedInsert = new InsertTestRule(TypeTest.class);
+
+    @Rule
+    public SimplDbTestRule mSimplDb = new SimplDbTestRule(2);
 
     @Test
     public void columns() throws Exception {
@@ -368,11 +353,10 @@ public class SimplDbTest {
     @Test
     public void getTables() throws Exception {
         HashSet<String> expected = new HashSet<>();
-        for (Class<? extends TableDef> table : mSimplDb.mTableDefs)
+        for (Class<? extends TableDef> table : mSimplDb.get().mTableDefs)
             expected.add(getName(table));
 
-        SQLiteDatabase db = mSimplDb.getReadableDatabase();
-        HashSet<String> tables = new HashSet<>(SimplDb.getTables(db));
+        HashSet<String> tables = new HashSet<>(SimplDb.getTables(mSimplDb.db()));
         assertTrue(tables.containsAll(expected));
     }
 
@@ -405,8 +389,7 @@ public class SimplDbTest {
             mCursor.close();
         }
 
-        SQLiteDatabase db = mSimplDb.getWritableDatabase();
-        assertTrue(db.delete(TYPE_TABLE, "1", null) > 0);
+        assertTrue(mSimplDb.db().delete(TYPE_TABLE, "1", null) > 0);
 
         query(COLUMN_TABLE, null);
 
@@ -419,14 +402,13 @@ public class SimplDbTest {
 
     @Test
     public void getColumns() throws Exception {
-        SQLiteDatabase db = mSimplDb.getReadableDatabase();
-        HashSet<String> columns = new HashSet<>(SimplDb.getColumns(db, getName(TableTest.class)));
+        HashSet<String> columns = new HashSet<>(SimplDb.getColumns(mSimplDb.db(), getName(TableTest.class)));
         assertEquals(new HashSet<>(Arrays.asList(DATA, KEY, INFO, KEEP, VALUE)), columns);
     }
 
     void insertAndQuery(Insert insert, final String table) throws InterruptedException {
         mCursor = null;
-        mSimplDb.insert(insert, new Callback() {
+        mSimplDb.get().insert(insert, new Callback() {
             @Override
             public void onInsertFinished(long rowId, Insert insert, SimplDb db) {
                 query(table, null);
@@ -437,7 +419,6 @@ public class SimplDbTest {
     }
 
     void query(String table, String selection, String... args) {
-        SQLiteDatabase db = mSimplDb.getReadableDatabase();
-        mCursor = db.query(table, null, selection, args, null, null, null);
+        mCursor = mSimplDb.db().query(table, null, selection, args, null, null, null);
     }
 }

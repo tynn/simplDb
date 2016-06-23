@@ -17,62 +17,35 @@
 package simpl.db;
 
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.test.filters.SdkSuppress;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-import simpl.db.db.v21.DatabaseTest;
 import simpl.db.db.v21.TableTest;
+import simpl.db.test.SimplDbTestRule;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.support.test.InstrumentationRegistry.getContext;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static simpl.db.SimplDb.getName;
 
 @SdkSuppress(minSdkVersion = LOLLIPOP)
 public class SimplDbLollipopTest {
-    SimplDb mSimplDb;
+    static final String[] rows = {"rowid"};
 
-    @BeforeClass
-    public static void deleteAllDatabases() {
-        SimplDbTest.deleteAllDatabases();
-    }
+    @Rule
+    public SimplDbTestRule mSimplDb = new SimplDbTestRule(21);
 
-    @Before
-    public void createDatabase() {
-        mSimplDb = new DatabaseTest(getContext());
-    }
-
-    @After
-    public void deleteDatabase() {
-        mSimplDb.delete();
-    }
+    @Rule
+    public ExpectedException failure = ExpectedException.none();
 
     @Test
     public void rowid() throws Exception {
-        final String[] rows = {"rowid"};
         SQLException error = null;
-        SQLiteDatabase db = mSimplDb.getReadableDatabase();
 
-        try {
-            db.query(getName(TableTest.MI.class), rows, null, null, null, null, null).close();
-        } catch (SQLException e) {
-            error = e;
-        } finally {
-            assertNull(error);
-        }
+        mSimplDb.db().query(getName(TableTest.MI.class), rows, null, null, null, null, null).close();
 
-        try {
-            db.query(getName(TableTest.OI.class), rows, null, null, null, null, null).close();
-        } catch (SQLException e) {
-            error = e;
-        } finally {
-            assertNotNull(error);
-        }
+        failure.expect(SQLException.class);
+        mSimplDb.db().query(getName(TableTest.OI.class), rows, null, null, null, null, null).close();
     }
 }

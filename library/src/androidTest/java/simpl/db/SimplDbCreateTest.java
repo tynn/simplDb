@@ -17,15 +17,14 @@
 package simpl.db;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 
-import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import simpl.db.db.v1.DatabaseTest;
 import simpl.db.db.v1.TableTest;
+import simpl.db.test.SimplDbTestRule;
 
 import static android.database.DatabaseUtils.queryNumEntries;
 import static android.support.test.InstrumentationRegistry.getContext;
@@ -35,23 +34,20 @@ import static simpl.db.SimplDb.getName;
 
 public class SimplDbCreateTest {
 
-    @BeforeClass
-    public static void deleteAllDatabases() {
-        SimplDbTest.deleteAllDatabases();
-    }
+    @Rule
+    public SimplDbTestRule mSimplDb = new SimplDbTestRule(1);
 
     @Test
+    @SuppressWarnings("TryFinallyCanBeTryWithResources")
     public void createAndDeleteDatabase() {
         Context context = getContext();
-        SimplDb simplDb = new DatabaseTest(context);
         assertEquals(0, context.databaseList().length);
-        SQLiteDatabase db = simplDb.getReadableDatabase();
         try {
-            assertTrue(Arrays.asList(context.databaseList()).contains(simplDb.name));
-            assertEquals(0, queryNumEntries(db, getName(TableTest.class)));
+            mSimplDb.db();
+            assertTrue(Arrays.asList(context.databaseList()).contains(mSimplDb.get().name));
+            assertEquals(0, queryNumEntries(mSimplDb.db(), getName(TableTest.class)));
         } finally {
-            db.close();
-            simplDb.delete();
+            mSimplDb.get().delete();
             assertEquals(0, context.databaseList().length);
         }
     }

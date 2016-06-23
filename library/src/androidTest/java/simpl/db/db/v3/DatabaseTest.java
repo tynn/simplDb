@@ -16,14 +16,9 @@
 
 package simpl.db.db.v3;
 
-import android.content.Context;
-
 import simpl.db.api.Database;
-import simpl.db.SimplDb;
+import simpl.db.test.SimplDbTestImpl;
 
 @Database(tables = {TableTest.class}, version = 3)
-public class DatabaseTest extends SimplDb {
-    public DatabaseTest(Context context) {
-        super(context);
-    }
+public class DatabaseTest extends SimplDbTestImpl {
 }

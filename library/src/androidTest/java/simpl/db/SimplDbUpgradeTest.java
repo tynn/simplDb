@@ -17,17 +17,16 @@
 package simpl.db;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import simpl.db.SimplDb.Insert;
 import simpl.db.db.v1.TableTest;
 import simpl.db.db.v2.ColumnTest;
+import simpl.db.test.SimplDbTestRule;
 
-import static android.support.test.InstrumentationRegistry.getContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,13 +40,16 @@ import static simpl.db.db.v1.TableTest.KEEP;
 public class SimplDbUpgradeTest {
     private final static String TABLE = getName(TableTest.class);
 
-    SimplDb mSimpleDb;
     Cursor mCursor;
 
-    @Before
-    public void deleteAllDatabases() {
-        SimplDbTest.deleteAllDatabases();
-    }
+    @Rule
+    public SimplDbTestRule mSimpleDb1 = new SimplDbTestRule(1);
+
+    @Rule
+    public SimplDbTestRule mSimpleDb2 = new SimplDbTestRule(2);
+
+    @Rule
+    public SimplDbTestRule mSimpleDb3 = new SimplDbTestRule(3);
 
     @Test
     public void keepAndDropColumns() throws Exception {
@@ -56,34 +58,24 @@ public class SimplDbUpgradeTest {
         values.put(DROP$, false);
         values.put(KEEP, true);
 
-        createDb(1);
+        insertAndQuery(mSimpleDb1.get(), values);
         try {
-            insertAndQuery(mSimpleDb, values);
-            try {
-                assertTrue(mCursor.moveToFirst());
-                assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
-                assertEquals(0, mCursor.getInt(mCursor.getColumnIndex(DROP)));
-                assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(KEEP)));
-            } finally {
-                mCursor.close();
-            }
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
+            assertEquals(0, mCursor.getInt(mCursor.getColumnIndex(DROP)));
+            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(KEEP)));
         } finally {
-            mSimpleDb.close();
+            mCursor.close();
         }
 
-        createDb(2);
+        mCursor = queryTable(mSimpleDb2.get());
         try {
-            mCursor = queryTable(mSimpleDb);
-            try {
-                assertEquals(-1, mCursor.getColumnIndex(DROP));
-                assertTrue(mCursor.moveToFirst());
-                assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
-                assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(KEEP)));
-            } finally {
-                mCursor.close();
-            }
+            assertEquals(-1, mCursor.getColumnIndex(DROP));
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
+            assertEquals(1, mCursor.getInt(mCursor.getColumnIndex(KEEP)));
         } finally {
-            mSimpleDb.close();
+            mCursor.close();
         }
     }
 
@@ -92,44 +84,24 @@ public class SimplDbUpgradeTest {
         ContentValues values = new ContentValues();
         values.put(DATA, DATA);
 
-        createDb(1);
+        insertAndQuery(mSimpleDb1.get(), values);
         try {
-            insertAndQuery(mSimpleDb, values);
-            try {
-                assertTrue(mCursor.moveToFirst());
-                assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
-            } finally {
-                mCursor.close();
-            }
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
         } finally {
-            mSimpleDb.close();
+            mCursor.close();
         }
 
         final String table = getName(ColumnTest.class);
-        createDb(2);
-        try {
-            assertTrue(getTables(mSimpleDb.getReadableDatabase()).contains(table));
-        } finally {
-            mSimpleDb.close();
-        }
-        createDb(3);
-        try {
-            assertFalse(getTables(mSimpleDb.getReadableDatabase()).contains(table));
-        } finally {
-            mSimpleDb.close();
-        }
+        assertTrue(getTables(mSimpleDb2.db()).contains(table));
+        assertFalse(getTables(mSimpleDb3.db()).contains(table));
 
-        createDb(3);
+        mCursor = queryTable(mSimpleDb3.get());
         try {
-            mCursor = queryTable(mSimpleDb);
-            try {
-                assertTrue(mCursor.moveToFirst());
-                assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
-            } finally {
-                mCursor.close();
-            }
+            assertTrue(mCursor.moveToFirst());
+            assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
         } finally {
-            mSimpleDb.close();
+            mCursor.close();
         }
     }
 
@@ -147,20 +119,5 @@ public class SimplDbUpgradeTest {
 
     static Cursor queryTable(SimplDb db) {
         return db.getReadableDatabase().query(TABLE, null, null, null, null, null, null);
-    }
-
-    private void createDb(int version) {
-        Context context = getContext();
-        switch (version) {
-            case 3:
-                mSimpleDb = new simpl.db.db.v3.DatabaseTest(context);
-                break;
-            case 2:
-                mSimpleDb = new simpl.db.db.v2.DatabaseTest(context);
-                break;
-            case 1:
-            default:
-                mSimpleDb = new simpl.db.db.v1.DatabaseTest(context);
-        }
     }
 }
