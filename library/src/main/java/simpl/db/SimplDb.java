@@ -29,6 +29,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -322,12 +323,20 @@ public abstract class SimplDb implements SimplDef {
      * Delete this database completely.
      *
      * @see SQLiteOpenHelper#close()
+     * @see SQLiteDatabase#deleteDatabase(File)
      * @see Context#deleteDatabase(String)
      */
     public final void delete() {
         mSQLiteOpenHelper.close();
-        mContext.deleteDatabase(name + "-journal");
         mContext.deleteDatabase(name);
+        mContext.deleteDatabase(name + "-journal");
+        mContext.deleteDatabase(name + "-shm");
+        mContext.deleteDatabase(name + "-wal");
+
+        String prefix = name + "-mj";
+        for (String masterJournal : mContext.databaseList())
+            if (masterJournal.startsWith(prefix))
+                mContext.deleteDatabase(masterJournal);
     }
 
 	/* Thread handling */
