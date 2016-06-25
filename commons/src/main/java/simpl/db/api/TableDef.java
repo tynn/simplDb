@@ -31,7 +31,8 @@ public interface TableDef extends SimplDef {
          * Defines an autoincrement primary key integer column for the table.
          */
         @Column(type = ColumnType.INTEGER)
-        @PrimaryKey(autoincrement = true, sortorder = Sortorder.ASC)
+        @PrimaryKey(sortorder = Sortorder.ASC)
+        @NotNull
         String _ID = "_id";
     }
 
