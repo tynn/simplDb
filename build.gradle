@@ -32,7 +32,12 @@ subprojects {
     }
 }
 
-ext.group = "com.github.tynn.simpldb"
+ext {
+    group = "com.github.tynn.simpldb"
+
+    libVersion = '0.7'
+    sdkVersion = 24
+}
 
 task clean(type: Delete) {
     delete rootProject.buildDir

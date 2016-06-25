@@ -1,5 +1,5 @@
 apply from: "$rootProject.projectDir/java.gradle"
-apply from: "$rootProject.projectDir/maven.gradle"
+apply from: "$rootProject.projectDir/maven-jar.gradle"
 
 dependencies {
     include project(':external')

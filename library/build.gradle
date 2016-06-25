@@ -1,15 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion sdkVersion
     buildToolsVersion '24.0.0'
 
     defaultConfig {
         versionCode 7
-        versionName '0.7'
+        versionName libVersion
 
         minSdkVersion 8
-        targetSdkVersion 24
+        targetSdkVersion sdkVersion
 
         consumerProguardFiles 'proguard-library.txt'
 
@@ -27,6 +27,8 @@ dependencies {
     androidTestCompile project(':testing')
     androidTestCompile 'com.android.support.test:runner:0.5'
 }
+
+apply from: "$rootProject.projectDir/maven-aar.gradle"
 
 // android lint.jar configuration
 
@@ -48,29 +50,4 @@ task copyLinterJar(type: Copy) {
 project.afterEvaluate {
     def compileLintTask = project.tasks.find { it.name == 'compileLint' }
     compileLintTask.dependsOn(copyLinterJar)
-}
-
-// android maven exports
-apply plugin: 'com.github.dcendents.android-maven'
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    failOnError  false
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
 }

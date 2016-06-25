@@ -19,6 +19,7 @@ package simpl.db;
 import java.lang.annotation.Annotation;
 
 import simpl.db.api.Column;
+import simpl.db.api.Database;
 import simpl.db.api.ForeignKey;
 import simpl.db.api.Query;
 import simpl.db.api.SimplDef;
