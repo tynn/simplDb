@@ -24,14 +24,13 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
-import simpl.db.SimplDb;
 import simpl.db.api.Database;
 import simpl.db.api.Table;
 import simpl.db.spec.DatabaseSpec;
 import simpl.db.spec.TableSpec;
 
 class DatabaseSpecWriter extends SimplSpecWriter {
-    private static final String SIMPL_DB = SimplDb.class.getName();
+    private static final String SIMPL_DB = "simpl.db.SimplDb";
 
     DatabaseSpecWriter(ProcessingEnvironment processingEnv) {
         super(processingEnv, SIMPL_DB, Database.class, DatabaseSpec.class);

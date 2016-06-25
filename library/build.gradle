@@ -24,6 +24,7 @@ android {
 dependencies {
     compile project(':commons')
     testCompile 'junit:junit:4.12'
+    androidTestCompile project(':testing')
     androidTestCompile 'com.android.support.test:runner:0.5'
 }
 

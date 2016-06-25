@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.test;
+package simpl.db.test.rules;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -23,10 +23,10 @@ import org.junit.runners.model.Statement;
 import simpl.db.SimplDb;
 import simpl.db.api.TableDef;
 
-public class InsertTestRule extends SimplDb.Insert implements TestRule {
+public class UpdateTestRule extends SimplDb.Update implements TestRule {
 
-    public InsertTestRule(Class<? extends TableDef> tableDef) {
-        super(tableDef, null);
+    public UpdateTestRule(Class<? extends TableDef> tableDef, String whereClause) {
+        super(tableDef, null, whereClause, new String[argCount(whereClause)]);
     }
 
     @Override
@@ -35,8 +35,18 @@ public class InsertTestRule extends SimplDb.Insert implements TestRule {
             @Override
             public void evaluate() throws Throwable {
                 contentValues.clear();
+                for (int i = 0; i < whereArgs.length; i++)
+                    whereArgs[i] = null;
                 base.evaluate();
             }
         };
+    }
+
+    private static int argCount(String whereClause) {
+        int count = 0;
+        for (char c : whereClause.toCharArray())
+            if (c == '?')
+                count++;
+        return count;
     }
 }

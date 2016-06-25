@@ -17,8 +17,8 @@
 package simpl.db.db.v1;
 
 import simpl.db.api.Database;
-import simpl.db.test.SimplDbTestImpl;
+import simpl.db.db.TestDatabase;
 
 @Database(tables = {TableTest.class}, version = 1)
-public class DatabaseTest extends SimplDbTestImpl {
+public class DatabaseTest extends TestDatabase {
 }

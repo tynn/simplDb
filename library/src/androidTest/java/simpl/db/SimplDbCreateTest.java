@@ -23,8 +23,9 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+import simpl.db.db.TestDatabase;
 import simpl.db.db.v1.TableTest;
-import simpl.db.test.SimplDbTestRule;
+import simpl.db.test.rules.SimplDbTestRule;
 
 import static android.database.DatabaseUtils.queryNumEntries;
 import static android.support.test.InstrumentationRegistry.getContext;
@@ -35,7 +36,7 @@ import static simpl.db.SimplDb.getName;
 public class SimplDbCreateTest {
 
     @Rule
-    public SimplDbTestRule mSimplDb = new SimplDbTestRule(1);
+    public SimplDbTestRule mSimplDb = TestDatabase.v(1);
 
     @Test
     @SuppressWarnings("TryFinallyCanBeTryWithResources")

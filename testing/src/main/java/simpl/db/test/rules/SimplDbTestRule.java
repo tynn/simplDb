@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.test;
+package simpl.db.test.rules;
 
 import android.database.sqlite.SQLiteDatabase;
 
@@ -24,13 +24,12 @@ import org.junit.runners.model.Statement;
 
 import simpl.db.SimplDb;
 
-public class SimplDbTestRule implements TestRule {
-    private final int mVersion;
-    private SimplDb mSimplDb;
+public class SimplDbTestRule<D extends SimplDb> implements TestRule {
+    private final Class<? extends D> mSimplDbClass;
+    private D mSimplDb;
 
-    @SuppressWarnings("unchecked")
-    public SimplDbTestRule(int version) {
-        mVersion = version;
+    public SimplDbTestRule(Class<? extends D> simplDbClass) {
+        mSimplDbClass = simplDbClass;
     }
 
     @Override
@@ -38,36 +37,18 @@ public class SimplDbTestRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                mSimplDb = createDb(mVersion);
-                base.evaluate();
+                mSimplDb = mSimplDbClass.newInstance();
                 mSimplDb.delete();
-                mSimplDb = null;
+                base.evaluate();
             }
         };
     }
 
-    public SimplDb get() {
+    public D get() {
         return mSimplDb;
     }
 
     public SQLiteDatabase db() {
         return mSimplDb.getWritableDatabase();
-    }
-
-
-    private static SimplDb createDb(int version) {
-        switch (version) {
-            default:
-            case 1:
-                return new simpl.db.db.v1.DatabaseTest();
-            case 2:
-                return new simpl.db.db.v2.DatabaseTest();
-            case 3:
-                return new simpl.db.db.v3.DatabaseTest();
-            case 10:
-                return new simpl.db.db.v10.DatabaseTest();
-            case 21:
-                return new simpl.db.db.v21.DatabaseTest();
-        }
     }
 }

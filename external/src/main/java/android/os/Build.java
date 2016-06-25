@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.os;
-
 public class Build {
     public static class VERSION {
         public static final int SDK_INT = 21 + (int) (3 * Math.random());

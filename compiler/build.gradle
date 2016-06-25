@@ -2,7 +2,8 @@ apply from: "$rootProject.projectDir/java.gradle"
 apply from: "$rootProject.projectDir/maven.gradle"
 
 dependencies {
+    include project(':external')
     compile project(':commons')
     testCompile 'junit:junit:4.12'
-    include project(':external')
+    testCompile project(':dummies')
 }

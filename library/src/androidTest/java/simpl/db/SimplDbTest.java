@@ -27,13 +27,14 @@ import java.util.HashSet;
 import simpl.db.SimplDb.Insert;
 import simpl.db.SimplDb.Insert.Callback;
 import simpl.db.api.TableDef;
+import simpl.db.db.TestDatabase;
 import simpl.db.db.v2.ColumnTest;
 import simpl.db.db.v2.ConstraintTest;
 import simpl.db.db.v2.ForeignKeyTest;
 import simpl.db.db.v2.TableTest;
 import simpl.db.db.v2.TypeTest;
-import simpl.db.test.InsertTestRule;
-import simpl.db.test.SimplDbTestRule;
+import simpl.db.test.rules.InsertTestRule;
+import simpl.db.test.rules.SimplDbTestRule;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -92,7 +93,7 @@ public class SimplDbTest {
     public InsertTestRule mTypedInsert = new InsertTestRule(TypeTest.class);
 
     @Rule
-    public SimplDbTestRule mSimplDb = new SimplDbTestRule(2);
+    public SimplDbTestRule mSimplDb = TestDatabase.v(2);
 
     @Test
     public void columns() throws Exception {

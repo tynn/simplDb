@@ -31,10 +31,11 @@ import simpl.db.SimplQuery.Filter;
 import simpl.db.api.Join;
 import simpl.db.api.Query;
 import simpl.db.api.QueryDef;
+import simpl.db.db.TestDatabase;
 import simpl.db.db.v10.JoinTest;
 import simpl.db.db.v10.QueryTest;
 import simpl.db.db.v10.TableTest;
-import simpl.db.test.SimplDbTestRule;
+import simpl.db.test.rules.SimplDbTestRule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +48,7 @@ public class SimplQueryTest {
     Cursor mCursor;
 
     @Rule
-    public SimplDbTestRule mSimplDb = new SimplDbTestRule(10);
+    public SimplDbTestRule mSimplDb = TestDatabase.v(10);
 
     @Before
     public void setupDatabase() {

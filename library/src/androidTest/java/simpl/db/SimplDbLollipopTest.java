@@ -23,8 +23,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import simpl.db.db.TestDatabase;
 import simpl.db.db.v21.TableTest;
-import simpl.db.test.SimplDbTestRule;
+import simpl.db.test.rules.SimplDbTestRule;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static simpl.db.SimplDb.getName;
@@ -34,17 +35,14 @@ public class SimplDbLollipopTest {
     static final String[] rows = {"rowid"};
 
     @Rule
-    public SimplDbTestRule mSimplDb = new SimplDbTestRule(21);
+    public SimplDbTestRule mSimplDb = TestDatabase.v(21);
 
     @Rule
     public ExpectedException failure = ExpectedException.none();
 
     @Test
     public void rowid() throws Exception {
-        SQLException error = null;
-
         mSimplDb.db().query(getName(TableTest.MI.class), rows, null, null, null, null, null).close();
-
         failure.expect(SQLException.class);
         mSimplDb.db().query(getName(TableTest.OI.class), rows, null, null, null, null, null).close();
     }

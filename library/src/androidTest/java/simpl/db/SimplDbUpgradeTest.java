@@ -23,9 +23,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import simpl.db.SimplDb.Insert;
+import simpl.db.db.TestDatabase;
 import simpl.db.db.v1.TableTest;
 import simpl.db.db.v2.ColumnTest;
-import simpl.db.test.SimplDbTestRule;
+import simpl.db.test.rules.SimplDbTestRule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,13 +44,13 @@ public class SimplDbUpgradeTest {
     Cursor mCursor;
 
     @Rule
-    public SimplDbTestRule mSimpleDb1 = new SimplDbTestRule(1);
+    public SimplDbTestRule mSimpleDb1 = TestDatabase.v(1);
 
     @Rule
-    public SimplDbTestRule mSimpleDb2 = new SimplDbTestRule(2);
+    public SimplDbTestRule mSimpleDb2 = TestDatabase.v(2);
 
     @Rule
-    public SimplDbTestRule mSimpleDb3 = new SimplDbTestRule(3);
+    public SimplDbTestRule mSimpleDb3 = TestDatabase.v(3);
 
     @Test
     public void keepAndDropColumns() throws Exception {
