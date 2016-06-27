@@ -33,6 +33,7 @@ android {
 
 dependencies {
     compile project(':library')
+    compile project(':utilities')
     apt project(':compiler')
     testCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.5'

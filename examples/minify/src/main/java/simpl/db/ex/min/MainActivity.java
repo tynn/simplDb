@@ -29,7 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import simpl.db.SimplDb;
-import simpl.db.query.QueryLoader;
+import simpl.db.util.QueryLoader;
 import simpl.db.SimplQuery;
 
 public class MainActivity extends Activity implements SimplDb.Insert.Callback {

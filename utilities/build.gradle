@@ -1,0 +1,20 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion sdkVersion
+    buildToolsVersion '24.0.0'
+
+    defaultConfig {
+        versionCode 1
+        versionName libVersion
+
+        minSdkVersion 8
+        targetSdkVersion sdkVersion
+    }
+}
+
+dependencies {
+    compile project(':library')
+}
+
+apply from: "$rootProject.projectDir/maven-aar.gradle"

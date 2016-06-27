@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package simpl.db.query;
+package simpl.db.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -24,7 +24,6 @@ import android.os.Build;
 
 import simpl.db.SimplDb;
 import simpl.db.SimplQuery;
-import simpl.db.SimplQuery.Filter;
 import simpl.db.api.QueryDef;
 
 /**
@@ -37,13 +36,13 @@ import simpl.db.api.QueryDef;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class QueryLoader extends Loader<Cursor> {
     private final Class<? extends QueryDef> mQueryDef;
-    private final Filter mFilter;
+    private final SimplQuery.Filter mFilter;
     private final SimplDb mDb;
     private Cursor mData;
 
     private final SimplQuery.Callback mQueryDefCallback = new SimplQuery.Callback() {
         @Override
-        public void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, Filter filter, SimplDb db) {
+        public void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
             deliverCursor(cursor);
         }
     };
@@ -70,7 +69,7 @@ public class QueryLoader extends Loader<Cursor> {
      * @param filter   to apply
      * @param db       to use
      */
-    public QueryLoader(Context context, Class<? extends QueryDef> queryDef, Filter filter, SimplDb db) {
+    public QueryLoader(Context context, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
         super(context);
         db.registerTableObserver(mTableDefObserver, queryDef);
         mQueryDef = queryDef;
