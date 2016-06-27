@@ -1,5 +1,6 @@
 include ':library'
 include ':linter'
+include ':reactive'
 include ':compiler'
 include ':commons'
 include ':internal'
