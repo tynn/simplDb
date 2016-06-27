@@ -29,13 +29,16 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 import simpl.db.api.Database;
+import simpl.db.api.Query;
 import simpl.db.api.Table;
 
 public final class SimplProcessor extends AbstractProcessor {
     private static final String DATABASE = Database.class.getCanonicalName();
+    private static final String QUERY = Query.class.getCanonicalName();
     private static final String TABLE = Table.class.getCanonicalName();
 
     private SimplSpecWriter databaseSpecWriter;
+    private SimplSpecWriter querySpecWriter;
     private SimplSpecWriter tableSpecWriter;
 
     @Override
@@ -47,6 +50,7 @@ public final class SimplProcessor extends AbstractProcessor {
     public Set<String> getSupportedAnnotationTypes() {
         LinkedHashSet<String> types = new LinkedHashSet<>();
         types.add(DATABASE);
+        types.add(QUERY);
         types.add(TABLE);
         return types;
     }
@@ -55,6 +59,7 @@ public final class SimplProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         databaseSpecWriter = new DatabaseSpecWriter(processingEnv);
+        querySpecWriter = new QuerySpecWriter(processingEnv);
         tableSpecWriter = new TableSpecWriter(processingEnv);
     }
 
@@ -72,6 +77,8 @@ public final class SimplProcessor extends AbstractProcessor {
         String name = annotation.getQualifiedName().toString();
         if (DATABASE.equals(name))
             writer = databaseSpecWriter;
+        else if (QUERY.equals(name))
+            writer = querySpecWriter;
         else if (TABLE.equals(name))
             writer = tableSpecWriter;
         else

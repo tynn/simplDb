@@ -18,6 +18,7 @@ package simpl.db;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import simpl.db.api.Query;
 import simpl.db.api.QueryDef;
 import simpl.db.api.Table;
 import simpl.db.api.TableDef;
+import simpl.db.spec.QuerySpec;
 
 /**
  * {@code SimplQuery} is the base class for all simplDb queries.
@@ -42,6 +44,7 @@ import simpl.db.api.TableDef;
  * </p>
  */
 public class SimplQuery {
+    private static final String QUERY_SPEC = "$$QuerySpec";
     private static final HashMap<Class<? extends QueryDef>, SimplQuery> I = new HashMap<>();
 
     /**
@@ -54,12 +57,12 @@ public class SimplQuery {
      * @param queryDef to compiled
      * @return a newly created or cached instance for {@code queryDef}
      */
-    public static SimplQuery get(Class<? extends QueryDef> queryDef) {
+    public static synchronized SimplQuery get(Class<? extends QueryDef> queryDef) {
         SimplQuery simplQuery = I.get(queryDef);
         if (simplQuery == null) {
-            Query query = queryDef.getAnnotation(Query.class);
-            if (query != null) {
-                simplQuery = new SimplQuery(query, queryDef.getAnnotation(Join.class));
+            QuerySpec spec = loadQuerySpec(queryDef);
+            if (spec != null) {
+                simplQuery = new SimplQuery(spec.annotation, spec.join);
             } else if (TableDef.class.isAssignableFrom(queryDef)) {
                 simplQuery = new SimplQuery(queryDef.asSubclass(TableDef.class));
             } else try {
@@ -72,6 +75,27 @@ public class SimplQuery {
             I.put(queryDef, simplQuery);
         }
         return simplQuery;
+    }
+
+    private static QuerySpec loadQuerySpec(Class<? extends QueryDef> queryDef) {
+        String querySpecName = queryDef.getName() + QUERY_SPEC;
+        try {
+            return (QuerySpec) Class.forName(querySpecName).newInstance();
+        } catch (ClassCastException e) {
+            throw new SimplError(querySpecName + " must extend " + QuerySpec.class);
+        } catch (ClassNotFoundException e) {
+            Log.i(SimplDb.TAG, querySpecName + " not found");
+        } catch (Exception e) {
+            Log.e(SimplDb.TAG, "error", e);
+        }
+
+        Query query = queryDef.getAnnotation(Query.class);
+        if (query == null)
+            return null;
+
+        QuerySpec spec = new QuerySpec("none", query, queryDef);
+        spec.join = queryDef.getAnnotation(Join.class);
+        return spec;
     }
 
     private final Collection<Class<? extends TableDef>> mTableDefs;

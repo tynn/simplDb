@@ -27,10 +27,14 @@ import java.util.Map;
 import simpl.db.api.Column;
 import simpl.db.api.Constraint;
 import simpl.db.api.Database;
+import simpl.db.api.Join;
+import simpl.db.api.Query;
 import simpl.db.api.Table;
 import simpl.db.db.TestDatabase;
+import simpl.db.db.TestQuery;
 import simpl.db.db.TestTable;
 import simpl.db.spec.DatabaseSpec;
+import simpl.db.spec.QuerySpec;
 import simpl.db.spec.TableSpec;
 
 import static org.junit.Assert.assertEquals;
@@ -59,6 +63,20 @@ public class SimplProcessorTest {
         assertEquals(tableDef, tableSpec.simplDef);
         assertEquals(tableAnn, tableSpec.annotation);
         assertEquals(tableDef.getSimpleName(), tableSpec.name);
+    }
+
+    @Test
+    public void querySpec() throws Exception {
+        Class<TestQuery> queryDef = TestQuery.class;
+        Query queryAnn = queryDef.getAnnotation(Query.class);
+        Join joinAnn = queryDef.getAnnotation(Join.class);
+        Class<?> querySpec = Class.forName(queryDef.getName() + "$$" + QuerySpec.class.getSimpleName());
+        QuerySpec spec = (QuerySpec) querySpec.newInstance();
+
+        assertEquals(queryDef, spec.simplDef);
+        assertEquals(queryAnn, spec.annotation);
+        assertEquals(joinAnn, spec.join);
+        assertEquals(queryDef.getSimpleName(), spec.name);
     }
 
     @Test
