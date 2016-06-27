@@ -39,12 +39,26 @@ public abstract class SimplDb implements SimplDef {
         }
     }
 
-    public static class Update extends Insert {
+    public static class Update {
+        public final Class<? extends TableDef> tableDef;
+        public final ContentValues contentValues = new ContentValues();
         public final String whereClause;
         public final String[] whereArgs;
 
         public Update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String... whereArgs) {
-            super(tableDef, contentValues);
+            this.tableDef = tableDef;
+            this.whereClause = whereClause;
+            this.whereArgs = whereArgs;
+        }
+    }
+
+    public static class Delete {
+        public final Class<? extends TableDef> tableDef;
+        public final String whereClause;
+        public final String[] whereArgs;
+
+        public Delete(Class<? extends TableDef> tableDef, String whereClause, String... whereArgs) {
+            this.tableDef = tableDef;
             this.whereClause = whereClause;
             this.whereArgs = whereArgs;
         }

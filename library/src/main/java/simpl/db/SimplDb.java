@@ -551,10 +551,6 @@ public abstract class SimplDb implements SimplDef {
         }
     }
 
-    private long insert(Insert insert) {
-        return insert(insert.tableDef, insert.contentValues);
-    }
-
     private synchronized long insert(Class<? extends TableDef> tableDef, ContentValues contentValues) {
         return mSQLiteOpenHelper.getWritableDatabase().insert(getName(tableDef), null, contentValues);
     }
@@ -613,7 +609,7 @@ public abstract class SimplDb implements SimplDef {
                 HashSet<Class<? extends TableDef>> updated = new HashSet<>();
 
                 for (final Insert insert : inserts) {
-                    final long rowId = insert(insert);
+                    final long rowId = insert(insert.tableDef, insert.contentValues);
 
                     if (rowId >= 0)
                         updated.add(insert.tableDef);
@@ -636,7 +632,7 @@ public abstract class SimplDb implements SimplDef {
      */
     public static class Insert {
         /**
-         * The table to stare the values in.
+         * The table to store the values in.
          */
         public final Class<? extends TableDef> tableDef;
         /**
@@ -665,10 +661,6 @@ public abstract class SimplDb implements SimplDef {
              */
             void onInsertFinished(long rowId, Insert insert, SimplDb db);
         }
-    }
-
-    private int update(Update update) {
-        return update(update.tableDef, update.contentValues, update.whereClause, update.whereArgs);
     }
 
     private synchronized int update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String[] whereArgs) {
@@ -737,7 +729,7 @@ public abstract class SimplDb implements SimplDef {
                 HashSet<Class<? extends TableDef>> updated = new HashSet<>();
 
                 for (final Update update : updates) {
-                    final int rowCount = update(update);
+                    final int rowCount = update(update.tableDef, update.contentValues, update.whereClause, update.whereArgs);
 
                     if (rowCount >= 0)
                         updated.add(update.tableDef);
@@ -758,16 +750,34 @@ public abstract class SimplDb implements SimplDef {
     /**
      * Simple wrapper around values to update and a table to update in.
      */
-    public static class Update extends Insert {
+    public static class Update {
+        /**
+         * The table to store the values in.
+         */
+        public final Class<? extends TableDef> tableDef;
+        /**
+         * The values to update in the table.
+         */
+        public final ContentValues contentValues = new ContentValues();
+        /**
+         * The where clause to match the rows to update.
+         */
         public final String whereClause;
+        /**
+         * Arguments used within {@code whereClause}.
+         */
         public final String[] whereArgs;
 
         /**
          * @param tableDef      to operate on
          * @param contentValues to update
+         * @param whereClause   to match
+         * @param whereArgs     to fill the ?s of {@code whereClause}
          */
         public Update(Class<? extends TableDef> tableDef, ContentValues contentValues, String whereClause, String... whereArgs) {
-            super(tableDef, contentValues);
+            this.tableDef = tableDef;
+            if (contentValues != null)
+                this.contentValues.putAll(contentValues);
             this.whereClause = whereClause;
             this.whereArgs = whereArgs;
         }
@@ -785,24 +795,131 @@ public abstract class SimplDb implements SimplDef {
         }
     }
 
+    private synchronized int delete(Class<? extends TableDef> tableDef, String whereClause, String... whereArgs) {
+        return mSQLiteOpenHelper.getWritableDatabase().delete(getName(tableDef), whereClause, whereArgs);
+    }
+
     /**
      * @param tableDef to operate on
      * @param id       of the row
+     * @param callback to notify
      */
-    public void delete(final Class<? extends TableDef> tableDef, final long id) {
-        if (isUiThread())
+    public void delete(Class<? extends TableDef> tableDef, long id, Delete.Callback callback) {
+        delete(new Delete(tableDef, TableDef.WithID._ID + "=?", String.valueOf(id)), callback);
+    }
+
+    /**
+     * @param tableDef    to operate on
+     * @param whereClause of where to delete
+     * @param whereArgs   to fill the ?s of {@code whereClause}
+     * @param callback    to notify
+     */
+    public void delete(Class<? extends TableDef> tableDef, String whereClause, String[] whereArgs, Delete.Callback callback) {
+        delete(new Delete(tableDef, whereClause, whereArgs), callback);
+    }
+
+    /**
+     * @param delete   to execute
+     * @param callback to notify
+     */
+    public void delete(final Delete delete, final Delete.Callback callback) {
+        if (isUiThread()) {
             runOnWorkerThread(new Runnable() {
                 @Override
                 public void run() {
-                    delete(tableDef, id);
+                    delete(delete, callback);
                 }
             });
-        else if (delete(getName(tableDef), "_id=?", Long.toString(id)))
-            sendTableChanged(tableDef);
+        } else {
+            final int rowCount = delete(delete.tableDef, delete.whereClause, delete.whereArgs);
+
+            if (rowCount > 0)
+                sendTableChanged(delete.tableDef);
+
+            if (callback != null)
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onDeleteFinished(rowCount, delete, SimplDb.this);
+                    }
+                });
+        }
     }
 
-    private boolean delete(String table, String whereClause, String... whereArgs) {
-        return mSQLiteOpenHelper.getWritableDatabase().delete(table, whereClause, whereArgs) > 0;
+    /**
+     * @param deletes  to execute
+     * @param callback to notify
+     */
+    public void delete(final Collection<Delete> deletes, final Delete.Callback callback) {
+        if (deletes.size() > 0)
+            if (isUiThread()) {
+                runOnWorkerThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        delete(deletes, callback);
+                    }
+                });
+            } else {
+                HashSet<Class<? extends TableDef>> updated = new HashSet<>();
+
+                for (final Delete delete : deletes) {
+                    final int rowCount = delete(delete.tableDef, delete.whereClause, delete.whereArgs);
+
+                    if (rowCount >= 0)
+                        updated.add(delete.tableDef);
+
+                    if (callback != null)
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onDeleteFinished(rowCount, delete, SimplDb.this);
+                            }
+                        });
+                }
+
+                sendTableChanged(updated);
+            }
+    }
+
+    /**
+     * Simple wrapper around where to delete rows from a table.
+     */
+    public static class Delete {
+        /**
+         * The table to store the values in.
+         */
+        public final Class<? extends TableDef> tableDef;
+        /**
+         * The where clause to match the rows to update.
+         */
+        public final String whereClause;
+        /**
+         * Arguments used within {@code whereClause}.
+         */
+        public final String[] whereArgs;
+
+        /**
+         * @param tableDef    to operate on
+         * @param whereClause to match
+         * @param whereArgs   to fill the ?s of {@code whereClause}
+         */
+        public Delete(Class<? extends TableDef> tableDef, String whereClause, String... whereArgs) {
+            this.tableDef = tableDef;
+            this.whereClause = whereClause;
+            this.whereArgs = whereArgs;
+        }
+
+        /**
+         * A {@code Callback} to be notified after the update.
+         */
+        public interface Callback {
+            /**
+             * @param rowCount of rows updated
+             * @param delete   which was executed
+             * @param db       to insert into
+             */
+            void onDeleteFinished(int rowCount, Delete delete, SimplDb db);
+        }
     }
 
 	/* SQLiteOpenHelper handling */
