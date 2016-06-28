@@ -198,12 +198,12 @@ public class SimplDbRx extends SimplDb {
                             query(queryDef, filter, callback);
                     }
                 };
-                registerTableObserver(observer, queryDef);
+                registerObserver(observer, queryDef);
 
                 subscriber.add(Subscriptions.create(new Action0() {
                     @Override
                     public void call() {
-                        unregisterTableObserver(observer);
+                        unregisterObserver(observer);
                     }
                 }));
             }

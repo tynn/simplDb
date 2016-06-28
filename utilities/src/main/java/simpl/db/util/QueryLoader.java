@@ -71,7 +71,7 @@ public class QueryLoader extends Loader<Cursor> {
      */
     public QueryLoader(Context context, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
         super(context);
-        db.registerTableObserver(mTableDefObserver, queryDef);
+        db.registerObserver(mTableDefObserver, queryDef);
         mQueryDef = queryDef;
         mFilter = filter;
         mDb = db;
