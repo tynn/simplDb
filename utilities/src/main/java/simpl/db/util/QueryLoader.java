@@ -77,10 +77,19 @@ public class QueryLoader extends Loader<Cursor> {
         mDb = db;
     }
 
+    private void setData(Cursor data) {
+        if (mData != data) {
+            if (mData != null)
+                mData.close();
+            mData = data;
+        }
+    }
+
     void deliverCursor(Cursor data) {
-        if (isStarted())
+        if (isStarted()) {
+            setData(data);
             deliverResult(data);
-        mData = data;
+        }
     }
 
     void requestCursor() {
@@ -106,9 +115,6 @@ public class QueryLoader extends Loader<Cursor> {
 
     @Override
     protected void onReset() {
-        if (mData != null) {
-            mData.close();
-            mData = null;
-        }
+        setData(null);
     }
 }
