@@ -44,13 +44,13 @@ public class SimplDbUpgradeTest {
     Cursor mCursor;
 
     @Rule
-    public SimplDbTestRule mSimpleDb1 = TestDatabase.v(1);
+    public SimplDbTestRule mSimplDb1 = TestDatabase.v(1);
 
     @Rule
-    public SimplDbTestRule mSimpleDb2 = TestDatabase.v(2);
+    public SimplDbTestRule mSimplDb2 = TestDatabase.v(2);
 
     @Rule
-    public SimplDbTestRule mSimpleDb3 = TestDatabase.v(3);
+    public SimplDbTestRule mSimplDb3 = TestDatabase.v(3);
 
     @Test
     public void keepAndDropColumns() throws Exception {
@@ -59,7 +59,7 @@ public class SimplDbUpgradeTest {
         values.put(DROP$, false);
         values.put(KEEP, true);
 
-        insertAndQuery(mSimpleDb1.get(), values);
+        insertAndQuery(mSimplDb1.get(), values);
         try {
             assertTrue(mCursor.moveToFirst());
             assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
@@ -69,7 +69,7 @@ public class SimplDbUpgradeTest {
             mCursor.close();
         }
 
-        mCursor = queryTable(mSimpleDb2.get());
+        mCursor = queryTable(mSimplDb2.get());
         try {
             assertEquals(-1, mCursor.getColumnIndex(DROP));
             assertTrue(mCursor.moveToFirst());
@@ -85,7 +85,7 @@ public class SimplDbUpgradeTest {
         ContentValues values = new ContentValues();
         values.put(DATA, DATA);
 
-        insertAndQuery(mSimpleDb1.get(), values);
+        insertAndQuery(mSimplDb1.get(), values);
         try {
             assertTrue(mCursor.moveToFirst());
             assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
@@ -94,10 +94,10 @@ public class SimplDbUpgradeTest {
         }
 
         final String table = getName(ColumnTest.class);
-        assertTrue(getTables(mSimpleDb2.db()).contains(table));
-        assertFalse(getTables(mSimpleDb3.db()).contains(table));
+        assertTrue(getTables(mSimplDb2.db()).contains(table));
+        assertFalse(getTables(mSimplDb3.db()).contains(table));
 
-        mCursor = queryTable(mSimpleDb3.get());
+        mCursor = queryTable(mSimplDb3.get());
         try {
             assertTrue(mCursor.moveToFirst());
             assertEquals(DATA, mCursor.getString(mCursor.getColumnIndex(DATA)));
