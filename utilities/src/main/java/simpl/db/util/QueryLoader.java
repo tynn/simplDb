@@ -40,17 +40,21 @@ public class QueryLoader extends Loader<Cursor> {
     private final SimplDb mDb;
     private Cursor mData;
 
-    private final SimplQuery.Callback mQueryDefCallback = new SimplQuery.Callback() {
+    private final SimplQuery.Callback mQueryCallback = new SimplQuery.Callback() {
         @Override
         public void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
-            deliverCursor(cursor);
+            if (!isReset()) {
+                setData(cursor);
+                if (isStarted())
+                    deliverResult(cursor);
+            }
         }
     };
 
-    private final SimplDb.Observer mTableDefObserver = new SimplDb.Observer() {
+    private final SimplDb.Observer mTableObserver = new SimplDb.Observer() {
         @Override
         public void onTableChanged(Class<? extends QueryDef> queryDef, SimplDb db) {
-            requestCursor();
+            onContentChanged();
         }
     };
 
@@ -71,13 +75,12 @@ public class QueryLoader extends Loader<Cursor> {
      */
     public QueryLoader(Context context, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
         super(context);
-        db.registerObserver(mTableDefObserver, queryDef);
         mQueryDef = queryDef;
         mFilter = filter;
         mDb = db;
     }
 
-    private void setData(Cursor data) {
+    void setData(Cursor data) {
         if (mData != data) {
             if (mData != null)
                 mData.close();
@@ -85,36 +88,33 @@ public class QueryLoader extends Loader<Cursor> {
         }
     }
 
-    void deliverCursor(Cursor data) {
-        if (isStarted()) {
-            setData(data);
-            deliverResult(data);
-        }
-    }
-
-    void requestCursor() {
-        mDb.query(mQueryDef, mFilter, mQueryDefCallback);
-    }
-
     @Override
     protected void onStartLoading() {
-        if (mData != null && !mData.isClosed())
-            deliverResult(mData);
+        mDb.registerObserver(mTableObserver, mQueryDef);
+        if (takeContentChanged() || mData == null || mData.isClosed())
+            mDb.query(mQueryDef, mFilter, mQueryCallback);
         else
-            requestCursor();
-    }
-
-    @Override
-    protected void onStopLoading() {
+            deliverResult(mData);
     }
 
     @Override
     protected void onForceLoad() {
-        requestCursor();
+        mDb.query(mQueryDef, mFilter, mQueryCallback);
+    }
+
+    @Override
+    protected void onStopLoading() {
+        mDb.unregisterObserver(mTableObserver);
+    }
+
+    @Override
+    protected void onAbandon() {
+        mDb.unregisterObserver(mTableObserver);
     }
 
     @Override
     protected void onReset() {
+        mDb.unregisterObserver(mTableObserver);
         setData(null);
     }
 }
