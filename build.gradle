@@ -35,7 +35,7 @@ subprojects {
 ext {
     group = "com.github.tynn.simpldb"
 
-    libVersion = '0.7'
+    libVersion = '0.8'
     sdkVersion = 24
 }
 

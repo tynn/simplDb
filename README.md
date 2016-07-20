@@ -10,10 +10,18 @@ that Java below version 8 only allows to define an annotation a single time on
 a type or field.
 
 
-## Introduction
+## Installation
+
+Get the latest release from the [JitPack repository][2]
+
+    compile "com.github.tynn.simpldb:library:$simplDbVersion"
+    apt "com.github.tynn.simpldb:compiler:$simplDbVersion"
+
+
+## Usage
 
 The main aim of this library is to create and update databases easily, while
-the usage itself is done with the `Cursor` directly.
+the data handling itself is done with a `Cursor` directly.
 
 ### Creating a database
 
@@ -98,13 +106,22 @@ For convenience and more complex queries it is possible to subclass `SimplQuery`
 and `QueryDef`.
 A default constructor must be provided for this implementation.
 
+### RxJava
 
-## Installation
+The reactive module provides `SimplDbRx`, a `SimplDb` subclass overloading the
+`insert()`, `update()`, `delete()` and `query()` methods without callback
+parameters returning observables. Additionally an `observe()` method is provided,
+wrapping the `registerObserver()` and `unregisterObserver()` methods.
 
-Get the latest release from the [JitPack repository][2]
+    compile "com.github.tynn.simpldb:reactive:$simplDbVersion"
 
-    compile 'com.github.tynn.simpldb:library:0.6'
-    apt 'com.github.tynn.simpldb:compiler:0.6'
+### Utilities
+
+This is a `QueryLoader` providing a default Android `Loader`. It handles the
+asynchronous loading and updates of the data. For the latter a `SimplDb.Observer`
+is used.
+
+    compile "com.github.tynn.simpldb:utilities:$simplDbVersion"
 
 
 ## License
