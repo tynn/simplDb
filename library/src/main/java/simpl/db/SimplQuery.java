@@ -124,7 +124,7 @@ public class SimplQuery {
         mTableDefs = Collections.unmodifiableCollection(Arrays.asList(tables));
         mTable = table;
         mColumns = columns;
-        mFilter.set(filter);
+        mFilter.setFrom(filter);
     }
 
     private SimplQuery(Query query, Join join) {
@@ -252,7 +252,7 @@ public class SimplQuery {
             this.id = id;
         }
 
-        void set(Filter filter) {
+        void setFrom(Filter filter) {
             if (filter != null) {
                 mSelection = filter.mSelection;
                 mSelectionArgs = filter.mSelectionArgs;
@@ -273,7 +273,8 @@ public class SimplQuery {
          */
         public void setSelection(String selection, String... selectionArgs) {
             mSelection = getNullString(selection);
-            mSelectionArgs = selectionArgs.length > 0 ? selectionArgs : null;
+            boolean noArgs = mSelection == null || selectionArgs == null || selectionArgs.length == 0;
+            mSelectionArgs = noArgs ? null : selectionArgs;
         }
 
         /**
@@ -298,7 +299,7 @@ public class SimplQuery {
         }
 
         /**
-         * @param limit or {@code null}
+         * @param limit or a value <= 0
          */
         public void setLimit(int limit) {
             mLimit = limit > 0 ? Integer.toString(limit) : null;
@@ -311,50 +312,39 @@ public class SimplQuery {
         String getSelection(Filter filter) {
             if (filter == null)
                 return mSelection;
-
-            return getNullString(filter.getSelection(null), mSelection);
+            return getNullString(filter.mSelection, mSelection);
         }
 
         String[] getSelectionArgs(Filter filter) {
             if (getSelection(filter) == null)
                 return null;
-
-            String[] selectionArgs = null;
-            if (filter != null)
-                selectionArgs = filter.getSelectionArgs(null);
-
-            if (selectionArgs == null)
+            if (filter == null || filter.mSelectionArgs == null)
                 return mSelectionArgs;
-
-            return selectionArgs;
+            return filter.mSelectionArgs;
         }
 
         String getGroupBy(Filter filter) {
             if (filter == null)
                 return mGroupBy;
-
-            return getNullString(filter.getGroupBy(null), mGroupBy);
+            return getNullString(filter.mGroupBy, mGroupBy);
         }
 
         String getOrderBy(Filter filter) {
             if (filter == null)
                 return mOrderBy;
-
-            return getNullString(filter.getOrderBy(null), mOrderBy);
+            return getNullString(filter.mOrderBy, mOrderBy);
         }
 
         String getHaving(Filter filter) {
             if (filter == null)
                 return mHaving;
-
-            return getNullString(filter.getHaving(null), mHaving);
+            return getNullString(filter.mHaving, mHaving);
         }
 
         String getLimit(Filter filter) {
             if (filter == null)
                 return mLimit;
-
-            return getNullString(filter.getLimit(null), mLimit);
+            return getNullString(filter.mLimit, mLimit);
         }
     }
 }
