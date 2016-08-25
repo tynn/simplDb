@@ -1,8 +1,8 @@
-# simplDb [![Release][1]][2]
+# simplDb [![Release][1]][2] [![Methods][3]][4]
 ###### Simplify SQLite on Android
 
 SimplDb is an annotation based simple database creator and updater. For this
-an implementation of `SQLiteOpenHelper` using [some strategies by SQLite][1]
+an implementation of `SQLiteOpenHelper` using [some strategies by SQLite][5]
 is provided. Additionally it manages annotation and code defined queries.
 
 Most of the SQLite constraints are already supported, but limited by the fact,
@@ -143,4 +143,6 @@ is used.
 
  [1]: https://jitpack.io/v/tynn/simpldb.svg
  [2]: https://jitpack.io/#tynn/simpldb
- [3]: https://www.sqlite.org/lang_altertable.html#otheralter
+ [3]: https://img.shields.io/badge/Methods%20and%20size-core:%20310%20|%20deps:%2089%20|%2045%20KB-e91e63.svg
+ [4]: http://www.methodscount.com/?lib=com.github.tynn.simpldb%3Alibrary%3A0.7
+ [5]: https://www.sqlite.org/lang_altertable.html#otheralter
