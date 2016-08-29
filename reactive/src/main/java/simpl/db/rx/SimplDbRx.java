@@ -23,6 +23,7 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.functions.Action0;
+import rx.internal.producers.SingleProducer;
 import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
 import rx.subscriptions.Subscriptions;
@@ -143,10 +144,8 @@ public class SimplDbRx extends SimplDb {
                 query(queryDef, filter, new SimplQuery.Callback() {
                     @Override
                     public void onQueryFinished(Cursor cursor, Class<? extends QueryDef> queryDef, SimplQuery.Filter filter, SimplDb db) {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(cursor);
-                            subscriber.onCompleted();
-                        }
+                        if (!subscriber.isUnsubscribed())
+                            subscriber.setProducer(new SingleProducer<>(subscriber, cursor));
                     }
                 });
             }
@@ -207,6 +206,6 @@ public class SimplDbRx extends SimplDb {
                     }
                 }));
             }
-        }).subscribeOn(mScheduler);
+        }).subscribeOn(mScheduler).onBackpressureLatest();
     }
 }
