@@ -77,7 +77,7 @@ public class SimplDbRx extends SimplDb {
                 });
             }
         }).subscribeOn(mScheduler).subscribe(subject);
-        return subject;
+        return subject.asObservable();
     }
 
     /**
@@ -99,7 +99,7 @@ public class SimplDbRx extends SimplDb {
                 });
             }
         }).subscribeOn(mScheduler).subscribe(subject);
-        return subject;
+        return subject.asObservable();
     }
 
     /**
@@ -121,7 +121,7 @@ public class SimplDbRx extends SimplDb {
                 });
             }
         }).subscribeOn(mScheduler).subscribe(subject);
-        return subject;
+        return subject.asObservable();
     }
 
     /**
