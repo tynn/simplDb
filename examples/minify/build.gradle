@@ -3,7 +3,7 @@ apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion sdkVersion
-    buildToolsVersion "24.0.0"
+    buildToolsVersion toolsVersion
 
     defaultConfig {
         versionName libVersion

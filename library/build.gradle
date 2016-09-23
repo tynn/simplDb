@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion sdkVersion
-    buildToolsVersion '24.0.0'
+    buildToolsVersion toolsVersion
 
     defaultConfig {
         versionCode 7
